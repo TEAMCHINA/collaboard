@@ -13,19 +13,28 @@ export function useSocketConnection(token: string, displayName: string) {
     if (!token || !displayName) return;
 
     const { setInitialState, applyOp } = useBoardStore.getState();
-    const { setConnected, setUsers } = useConnectionStore.getState();
+    const { setConnected, setReconnecting, setUsers } = useConnectionStore.getState();
     const { updateCursor, removeCursor } = useCursorStore.getState();
     const { setRemoteDrawing } = useDrawingStore.getState();
     const { onSaveStart, onSaveEnd, onSaveError } = useSaveStore.getState();
 
     socket.on("connect", () => {
       setConnected(true);
+      // Re-join room on every connect (including reconnects)
       socket.emit("board:join", { token, displayName });
       joined.current = true;
     });
 
     socket.on("disconnect", () => {
       setConnected(false);
+    });
+
+    socket.io.on("reconnect_attempt", () => {
+      setReconnecting(true);
+    });
+
+    socket.io.on("reconnect_failed", () => {
+      setReconnecting(false);
     });
 
     socket.on("board:state", ({ elements, seqNum }) => {
@@ -75,11 +84,18 @@ export function useSocketConnection(token: string, displayName: string) {
       console.error("Board error:", message);
     });
 
+    socket.on("connect_error", (err) => {
+      console.error("Socket connection error:", err.message);
+    });
+
     socket.connect();
 
     return () => {
       socket.off("connect");
       socket.off("disconnect");
+      socket.off("connect_error");
+      socket.io.off("reconnect_attempt");
+      socket.io.off("reconnect_failed");
       socket.off("board:state");
       socket.off("board:operation");
       socket.off("board:user-list");

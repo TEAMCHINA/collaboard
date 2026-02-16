@@ -10,6 +10,7 @@ import { CursorOverlay } from "../components/CursorOverlay/CursorOverlay";
 import { UserNamePrompt } from "../components/UserNamePrompt/UserNamePrompt";
 import { TextInput } from "../components/TextOverlay/TextInput";
 import { SaveIndicator } from "../components/SaveIndicator/SaveIndicator";
+import { ConnectionOverlay } from "../components/ConnectionOverlay/ConnectionOverlay";
 
 export function BoardPage() {
   const { token } = useParams<{ token: string }>();
@@ -83,6 +84,7 @@ function BoardPageInner({ token, displayName, onNameChange }: { token: string; d
         )}
       </div>
       <SaveIndicator />
+      <ConnectionOverlay />
     </div>
   );
 }

@@ -25,7 +25,19 @@ export function registerHandlers(io: TypedServer, socket: TypedSocket): void {
   let currentRoom: string | null = null;
   let currentUser: ConnectedUser | null = null;
 
-  socket.on("board:join", ({ token, displayName }) => {
+  function safe<T extends unknown[]>(handler: (...args: T) => void) {
+    return (...args: T) => {
+      try {
+        handler(...args);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "Unknown error";
+        console.error(`Handler error [${socket.id}]: ${msg}`);
+        socket.emit("board:error", msg);
+      }
+    };
+  }
+
+  socket.on("board:join", safe(({ token, displayName }) => {
     // Leave previous room if any
     if (currentRoom) {
       socket.leave(currentRoom);
@@ -77,9 +89,9 @@ export function registerHandlers(io: TypedServer, socket: TypedSocket): void {
       displayName,
       users: getRoomUsers(token),
     });
-  });
+  }));
 
-  socket.on("board:operation", (op: Operation) => {
+  socket.on("board:operation", safe((op: Operation) => {
     if (!currentRoom || !currentUser) return;
 
     const board = getOrCreateBoard(currentRoom);
@@ -90,9 +102,9 @@ export function registerHandlers(io: TypedServer, socket: TypedSocket): void {
 
     // Broadcast to all in room (including sender for confirmation)
     io.to(currentRoom).emit("board:operation", stamped);
-  });
+  }));
 
-  socket.on("board:undo", () => {
+  socket.on("board:undo", safe(() => {
     if (!currentRoom || !currentUser) return;
 
     const lastOp = popUndo(currentRoom, currentUser.displayName);
@@ -109,9 +121,9 @@ export function registerHandlers(io: TypedServer, socket: TypedSocket): void {
 
     const stamped = applyOp(board, inverseOp);
     io.to(currentRoom).emit("board:operation", stamped);
-  });
+  }));
 
-  socket.on("board:redo", () => {
+  socket.on("board:redo", safe(() => {
     if (!currentRoom || !currentUser) return;
 
     const redoOp = popRedo(currentRoom, currentUser.displayName);
@@ -127,9 +139,9 @@ export function registerHandlers(io: TypedServer, socket: TypedSocket): void {
 
     const stamped = applyOp(board, reapplied);
     io.to(currentRoom).emit("board:operation", stamped);
-  });
+  }));
 
-  socket.on("board:clear", () => {
+  socket.on("board:clear", safe(() => {
     if (!currentRoom || !currentUser) return;
 
     const board = getOrCreateBoard(currentRoom);
@@ -152,17 +164,17 @@ export function registerHandlers(io: TypedServer, socket: TypedSocket): void {
       pushOp(currentRoom, currentUser.displayName, stamped);
       io.to(currentRoom).emit("board:operation", stamped);
     }
-  });
+  }));
 
-  socket.on("board:drawing", (element) => {
+  socket.on("board:drawing", safe((element) => {
     if (!currentRoom || !currentUser) return;
     socket.to(currentRoom).emit("board:drawing", {
       displayName: currentUser.displayName,
       element,
     });
-  });
+  }));
 
-  socket.on("cursor:move", ({ x, y }) => {
+  socket.on("cursor:move", safe(({ x, y }) => {
     if (!currentRoom || !currentUser) return;
     socket.to(currentRoom).emit("cursor:update", {
       displayName: currentUser.displayName,
@@ -170,9 +182,9 @@ export function registerHandlers(io: TypedServer, socket: TypedSocket): void {
       y,
       color: currentUser.cursorColor,
     });
-  });
+  }));
 
-  socket.on("user:update-color", (color: string) => {
+  socket.on("user:update-color", safe((color: string) => {
     if (!currentRoom || !currentUser) return;
     currentUser.cursorColor = color;
     const users = roomUsers.get(currentRoom);
@@ -180,9 +192,9 @@ export function registerHandlers(io: TypedServer, socket: TypedSocket): void {
       users.set(socket.id, currentUser);
     }
     io.to(currentRoom).emit("board:user-list", getRoomUsers(currentRoom));
-  });
+  }));
 
-  socket.on("user:update-name", (newName: string) => {
+  socket.on("user:update-name", safe((newName: string) => {
     if (!currentRoom || !currentUser) return;
     currentUser.displayName = newName;
     const users = roomUsers.get(currentRoom);
@@ -190,8 +202,9 @@ export function registerHandlers(io: TypedServer, socket: TypedSocket): void {
       users.set(socket.id, currentUser);
     }
     io.to(currentRoom).emit("board:user-list", getRoomUsers(currentRoom));
-  });
+  }));
 
+  // disconnect is not wrapped in safe() — it must always run cleanup
   socket.on("disconnect", () => {
     if (currentRoom && currentUser) {
       const users = roomUsers.get(currentRoom);

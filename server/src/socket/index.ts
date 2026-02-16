@@ -10,10 +10,16 @@ export function setupSocketServer(httpServer: HttpServer): TypedServer {
     cors: {
       origin: "*",
     },
+    pingTimeout: 20000,
+    pingInterval: 25000,
   });
 
   io.on("connection", (socket) => {
     registerHandlers(io, socket);
+
+    socket.on("error", (err) => {
+      console.error(`Socket error [${socket.id}]:`, err.message);
+    });
   });
 
   return io;

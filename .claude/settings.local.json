@@ -4,7 +4,8 @@
       "WebSearch",
       "Bash(timeout 5 pnpm:*)",
       "Bash(pnpm test)",
-      "Bash(pnpm --filter shared build:*)"
+      "Bash(pnpm --filter shared build:*)",
+      "Bash(pnpm build:*)"
     ]
   }
 }
