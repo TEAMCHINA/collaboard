@@ -7,6 +7,7 @@ export interface ClientToServerEvents {
   "board:operation": (op: Operation) => void;
   "board:undo": () => void;
   "board:redo": () => void;
+  "board:drawing": (element: BoardElement | null) => void;
   "cursor:move": (data: { x: number; y: number }) => void;
   "user:update-color": (color: string) => void;
   "user:update-name": (newName: string) => void;
@@ -18,6 +19,7 @@ export interface ServerToClientEvents {
   "board:user-joined": (data: { displayName: string; users: ConnectedUser[] }) => void;
   "board:user-left": (data: { displayName: string; users: ConnectedUser[] }) => void;
   "board:user-list": (users: ConnectedUser[]) => void;
+  "board:drawing": (data: { displayName: string; element: BoardElement | null }) => void;
   "cursor:update": (data: { displayName: string; x: number; y: number; color: string }) => void;
   "board:error": (message: string) => void;
 }

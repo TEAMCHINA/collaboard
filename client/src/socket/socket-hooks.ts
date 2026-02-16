@@ -3,6 +3,7 @@ import { socket } from "./socket-client";
 import { useBoardStore } from "../store/board-store";
 import { useConnectionStore } from "../store/connection-store";
 import { useCursorStore } from "../store/cursor-store";
+import { useDrawingStore } from "../store/drawing-store";
 
 export function useSocketConnection(token: string, displayName: string) {
   const joined = useRef(false);
@@ -13,6 +14,7 @@ export function useSocketConnection(token: string, displayName: string) {
     const { setInitialState, applyOp } = useBoardStore.getState();
     const { setConnected, setUsers } = useConnectionStore.getState();
     const { updateCursor, removeCursor } = useCursorStore.getState();
+    const { setRemoteDrawing } = useDrawingStore.getState();
 
     socket.on("connect", () => {
       setConnected(true);
@@ -43,6 +45,11 @@ export function useSocketConnection(token: string, displayName: string) {
     socket.on("board:user-left", ({ displayName: name, users }) => {
       setUsers(users);
       removeCursor(name);
+      setRemoteDrawing(name, null);
+    });
+
+    socket.on("board:drawing", ({ displayName: name, element }) => {
+      setRemoteDrawing(name, element);
     });
 
     socket.on("cursor:update", ({ displayName: name, x, y, color }) => {
@@ -63,6 +70,7 @@ export function useSocketConnection(token: string, displayName: string) {
       socket.off("board:user-list");
       socket.off("board:user-joined");
       socket.off("board:user-left");
+      socket.off("board:drawing");
       socket.off("cursor:update");
       socket.off("board:error");
       socket.disconnect();

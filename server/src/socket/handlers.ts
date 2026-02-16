@@ -122,6 +122,14 @@ export function registerHandlers(io: TypedServer, socket: TypedSocket): void {
     io.to(currentRoom).emit("board:operation", stamped);
   });
 
+  socket.on("board:drawing", (element) => {
+    if (!currentRoom || !currentUser) return;
+    socket.to(currentRoom).emit("board:drawing", {
+      displayName: currentUser.displayName,
+      element,
+    });
+  });
+
   socket.on("cursor:move", ({ x, y }) => {
     if (!currentRoom || !currentUser) return;
     socket.to(currentRoom).emit("cursor:update", {

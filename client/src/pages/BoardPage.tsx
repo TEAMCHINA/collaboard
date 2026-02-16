@@ -1,15 +1,70 @@
+import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
+import { useUserStore } from "../store/user-store";
+import { useSocketConnection } from "../socket/socket-hooks";
+import { useBoard } from "../hooks/useBoard";
+import { socket } from "../socket/socket-client";
+import { Canvas } from "../components/Canvas/Canvas";
+import { Toolbar } from "../components/Toolbar/Toolbar";
+import { CursorOverlay } from "../components/CursorOverlay/CursorOverlay";
+import { UserNamePrompt } from "../components/UserNamePrompt/UserNamePrompt";
 
 export function BoardPage() {
   const { token } = useParams<{ token: string }>();
+  const [displayName, setDisplayName] = useState<string>("");
+  const getName = useUserStore((s) => s.getName);
+  const setName = useUserStore((s) => s.setName);
+
+  // Check for saved name
+  useEffect(() => {
+    if (!token) return;
+    const saved = getName(token);
+    if (saved) setDisplayName(saved);
+  }, [token, getName]);
+
+  const handleNameSubmit = (name: string) => {
+    if (!token) return;
+    setName(token, name);
+    setDisplayName(name);
+  };
+
+  if (!token) return null;
+
+  if (!displayName) {
+    return <UserNamePrompt onSubmit={handleNameSubmit} />;
+  }
+
+  return <BoardPageInner token={token} displayName={displayName} />;
+}
+
+function BoardPageInner({ token, displayName }: { token: string; displayName: string }) {
+  const lastCursorEmit = useRef(0);
+
+  useSocketConnection(token, displayName);
+  const { toolManager, handleToolChange } = useBoard(token, displayName);
+
+  // Emit cursor position (throttled)
+  const handleMouseMove = (e: React.MouseEvent) => {
+    const now = Date.now();
+    if (now - lastCursorEmit.current > 50) {
+      lastCursorEmit.current = now;
+      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+      socket.emit("cursor:move", {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+      });
+    }
+  };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-      <div style={{ padding: "8px 16px", background: "#f5f5f5", borderBottom: "1px solid #ddd" }}>
-        Board: {token}
-      </div>
-      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: "#999" }}>
-        Canvas will render here
+      <Toolbar onToolChange={handleToolChange} />
+      <div
+        style={{ flex: 1, position: "relative", overflow: "hidden" }}
+        onMouseMove={handleMouseMove}
+      >
+        <Canvas toolManager={toolManager} />
+        <CursorOverlay />
       </div>
     </div>
   );
