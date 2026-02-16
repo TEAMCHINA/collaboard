@@ -57,13 +57,18 @@ export function Toolbar({ onToolChange }: Props) {
 
       <div style={{ flex: 1 }} />
 
-      <span style={{
-        fontSize: 12,
-        color: connected ? "#16a34a" : "#dc2626",
-        display: "flex",
-        alignItems: "center",
-        gap: 4,
-      }}>
+      <span
+        style={{
+          fontSize: 12,
+          color: connected ? "#16a34a" : "#dc2626",
+          display: "flex",
+          alignItems: "center",
+          gap: 4,
+          position: "relative",
+          cursor: "default",
+        }}
+        title={users.map((u) => u.displayName).join("\n")}
+      >
         <span style={{
           width: 8,
           height: 8,
