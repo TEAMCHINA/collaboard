@@ -9,6 +9,7 @@ import { Toolbar } from "../components/Toolbar/Toolbar";
 import { CursorOverlay } from "../components/CursorOverlay/CursorOverlay";
 import { UserNamePrompt } from "../components/UserNamePrompt/UserNamePrompt";
 import { TextInput } from "../components/TextOverlay/TextInput";
+import { SaveIndicator } from "../components/SaveIndicator/SaveIndicator";
 
 export function BoardPage() {
   const { token } = useParams<{ token: string }>();
@@ -76,6 +77,7 @@ function BoardPageInner({ token, displayName }: { token: string; displayName: st
           />
         )}
       </div>
+      <SaveIndicator />
     </div>
   );
 }

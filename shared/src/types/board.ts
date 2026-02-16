@@ -5,6 +5,8 @@ export interface BoardState {
   elements: Map<string, BoardElement>;
   nextZIndex: number;
   seqNum: number;
+  dirty: boolean;
+  empty: boolean;
 }
 
 export interface BoardSnapshot {

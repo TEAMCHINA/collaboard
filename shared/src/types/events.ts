@@ -21,5 +21,8 @@ export interface ServerToClientEvents {
   "board:user-list": (users: ConnectedUser[]) => void;
   "board:drawing": (data: { displayName: string; element: BoardElement | null }) => void;
   "cursor:update": (data: { displayName: string; x: number; y: number; color: string }) => void;
+  "board:save-start": () => void;
+  "board:save-end": () => void;
+  "board:save-error": (message: string) => void;
   "board:error": (message: string) => void;
 }

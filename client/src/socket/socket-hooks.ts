@@ -4,6 +4,7 @@ import { useBoardStore } from "../store/board-store";
 import { useConnectionStore } from "../store/connection-store";
 import { useCursorStore } from "../store/cursor-store";
 import { useDrawingStore } from "../store/drawing-store";
+import { useSaveStore } from "../store/save-store";
 
 export function useSocketConnection(token: string, displayName: string) {
   const joined = useRef(false);
@@ -15,6 +16,7 @@ export function useSocketConnection(token: string, displayName: string) {
     const { setConnected, setUsers } = useConnectionStore.getState();
     const { updateCursor, removeCursor } = useCursorStore.getState();
     const { setRemoteDrawing } = useDrawingStore.getState();
+    const { onSaveStart, onSaveEnd, onSaveError } = useSaveStore.getState();
 
     socket.on("connect", () => {
       setConnected(true);
@@ -56,6 +58,19 @@ export function useSocketConnection(token: string, displayName: string) {
       updateCursor(name, x, y, color);
     });
 
+    socket.on("board:save-start", () => {
+      onSaveStart();
+    });
+
+    socket.on("board:save-end", () => {
+      onSaveEnd();
+    });
+
+    socket.on("board:save-error", (message) => {
+      console.error("Board save error:", message);
+      onSaveError(message);
+    });
+
     socket.on("board:error", (message) => {
       console.error("Board error:", message);
     });
@@ -72,6 +87,9 @@ export function useSocketConnection(token: string, displayName: string) {
       socket.off("board:user-left");
       socket.off("board:drawing");
       socket.off("cursor:update");
+      socket.off("board:save-start");
+      socket.off("board:save-end");
+      socket.off("board:save-error");
       socket.off("board:error");
       socket.disconnect();
       joined.current = false;
