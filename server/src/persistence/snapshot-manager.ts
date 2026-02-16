@@ -28,28 +28,14 @@ export function snapshotAll(): void {
   if (tokens.length === 0) return;
 
   const dirtyTokens: string[] = [];
-  const emptyTokens: string[] = [];
-
   for (const token of tokens) {
     const board = getBoard(token);
-    if (!board) continue;
-    if (board.empty) emptyTokens.push(token);
-    else if (board.dirty) dirtyTokens.push(token);
+    if (board?.dirty) dirtyTokens.push(token);
   }
 
-  // Final snapshot for empty boards before evicting them
-  for (const token of emptyTokens) {
-    const board = getBoard(token);
-    if (board) {
-      const elements = getBoardElements(token);
-      saveSnapshot(token, elements, board.seqNum);
-    }
-    removeBoard(token);
-  }
+  if (dirtyTokens.length === 0) return;
 
-  if (dirtyTokens.length === 0 && emptyTokens.length === 0) return;
-
-  if (dirtyTokens.length > 0 && io) {
+  if (io) {
     for (const token of dirtyTokens) {
       io.to(token).emit("board:save-start");
     }
@@ -66,18 +52,13 @@ export function snapshotAll(): void {
 
     persistToFile();
 
-    if (dirtyTokens.length > 0 && io) {
+    if (io) {
       for (const token of dirtyTokens) {
         io.to(token).emit("board:save-end");
       }
     }
 
-    if (dirtyTokens.length > 0) {
-      console.log(`Snapshot saved for ${dirtyTokens.length} dirty board(s)`);
-    }
-    if (emptyTokens.length > 0) {
-      console.log(`Evicted ${emptyTokens.length} empty board(s)`);
-    }
+    console.log(`Snapshot saved for ${dirtyTokens.length} dirty board(s)`);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown snapshot error";
     console.error(`Snapshot error: ${message}`);

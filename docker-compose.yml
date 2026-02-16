@@ -1,0 +1,16 @@
+services:
+  collaboard:
+    build: .
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - SNAPSHOT_INTERVAL=60000
+      - DB_PATH=/data/collaboard.db
+    volumes:
+      - collaboard-data:/data
+    restart: unless-stopped
+
+volumes:
+  collaboard-data:

@@ -1,15 +1,19 @@
+import type { ReactNode } from "react";
+
 interface Props {
-  label: string;
+  children: ReactNode;
+  title: string;
   active: boolean;
   onClick: () => void;
 }
 
-export function ToolButton({ label, active, onClick }: Props) {
+export function ToolButton({ children, title, active, onClick }: Props) {
   return (
     <button
       onClick={onClick}
+      title={title}
       style={{
-        padding: "6px 14px",
+        padding: "6px 10px",
         fontSize: 14,
         border: active ? "2px solid #2563eb" : "1px solid #ccc",
         borderRadius: 6,
@@ -17,9 +21,14 @@ export function ToolButton({ label, active, onClick }: Props) {
         color: active ? "#2563eb" : "#333",
         cursor: "pointer",
         fontWeight: active ? 600 : 400,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: 36,
+        height: 36,
       }}
     >
-      {label}
+      {children}
     </button>
   );
 }

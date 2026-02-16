@@ -59,8 +59,15 @@ export function Toolbar({ onToolChange, onClear, displayName, onNameChange }: Pr
       borderBottom: "1px solid #e5e7eb",
       flexShrink: 0,
     }}>
-      <ToolButton label="Pen" active={activeTool === "pen"} onClick={() => handleToolSelect("pen")} />
-      <ToolButton label="Text" active={activeTool === "text"} onClick={() => handleToolSelect("text")} />
+      <ToolButton title="Pen" active={activeTool === "pen"} onClick={() => handleToolSelect("pen")}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+          <path d="m15 5 4 4" />
+        </svg>
+      </ToolButton>
+      <ToolButton title="Text" active={activeTool === "text"} onClick={() => handleToolSelect("text")}>
+        <span style={{ fontSize: 18, fontWeight: 700, fontFamily: "serif", lineHeight: 1 }}>T</span>
+      </ToolButton>
 
       {activeTool === "pen" && (
         <>

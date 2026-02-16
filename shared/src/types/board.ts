@@ -6,7 +6,6 @@ export interface BoardState {
   nextZIndex: number;
   seqNum: number;
   dirty: boolean;
-  empty: boolean;
 }
 
 export interface BoardSnapshot {

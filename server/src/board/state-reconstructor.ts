@@ -26,6 +26,5 @@ export function reconstructBoard(
     nextZIndex: maxZIndex,
     seqNum: lastSeqNum,
     dirty: false,
-    empty: false,
   };
 }

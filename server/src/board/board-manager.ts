@@ -30,7 +30,6 @@ function loadFromSnapshot(token: string): BoardState {
         nextZIndex: maxZIndex,
         seqNum: snapshot.seqNum,
         dirty: false,
-        empty: false,
       };
     }
   } catch (err) {
@@ -43,7 +42,6 @@ function loadFromSnapshot(token: string): BoardState {
     nextZIndex: 0,
     seqNum: 0,
     dirty: false,
-    empty: false,
   };
 }
 

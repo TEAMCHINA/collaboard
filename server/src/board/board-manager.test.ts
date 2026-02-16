@@ -43,7 +43,6 @@ describe("getOrCreateBoard", () => {
     expect(board.elements.size).toBe(0);
     expect(board.seqNum).toBe(0);
     expect(board.dirty).toBe(false);
-    expect(board.empty).toBe(false);
   });
 
   it("returns the same board on repeated calls", () => {
@@ -100,7 +99,7 @@ describe("getBoardElements", () => {
   });
 });
 
-describe("dirty and empty flags", () => {
+describe("dirty flag", () => {
   it("dirty resets when set to false", () => {
     const board = getOrCreateBoard("b5");
     applyOp(board, makeAddOp("s1"));
@@ -108,14 +107,6 @@ describe("dirty and empty flags", () => {
 
     board.dirty = false;
     expect(board.dirty).toBe(false);
-  });
-
-  it("empty flag is settable", () => {
-    const board = getOrCreateBoard("b6");
-    expect(board.empty).toBe(false);
-
-    board.empty = true;
-    expect(board.empty).toBe(true);
   });
 });
 

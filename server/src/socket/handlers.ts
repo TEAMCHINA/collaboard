@@ -1,8 +1,9 @@
 import type { Socket } from "socket.io";
 import type { ClientToServerEvents, ServerToClientEvents, ConnectedUser, Operation } from "shared";
 import { generateId, invertOperation } from "shared";
-import { getOrCreateBoard, applyOp, getBoardElements, getBoard } from "../board/board-manager.js";
+import { getOrCreateBoard, applyOp, getBoardElements, getBoard, removeBoard } from "../board/board-manager.js";
 import { pushOp, popUndo, popRedo } from "../board/undo-manager.js";
+import { snapshotBoard } from "../persistence/snapshot-manager.js";
 import { getNextCursorColor } from "../utils/colors.js";
 import type { TypedServer } from "./index.js";
 
@@ -46,8 +47,8 @@ export function registerHandlers(io: TypedServer, socket: TypedSocket): void {
         users.delete(socket.id);
         if (users.size === 0) {
           roomUsers.delete(currentRoom);
-          const board = getBoard(currentRoom);
-          if (board) board.empty = true;
+          snapshotBoard(currentRoom);
+          removeBoard(currentRoom);
         }
         io.to(currentRoom).emit("board:user-left", {
           displayName: currentUser!.displayName,
@@ -69,10 +70,6 @@ export function registerHandlers(io: TypedServer, socket: TypedSocket): void {
       roomUsers.set(token, new Map());
     }
     roomUsers.get(token)!.set(socket.id, currentUser);
-
-    // Cancel pending eviction if someone rejoins before next snapshot cycle
-    const existingBoard = getBoard(token);
-    if (existingBoard) existingBoard.empty = false;
 
     // Initialize board
     const board = getOrCreateBoard(token);
@@ -212,8 +209,8 @@ export function registerHandlers(io: TypedServer, socket: TypedSocket): void {
         users.delete(socket.id);
         if (users.size === 0) {
           roomUsers.delete(currentRoom);
-          const board = getBoard(currentRoom);
-          if (board) board.empty = true;
+          snapshotBoard(currentRoom);
+          removeBoard(currentRoom);
         }
       }
       io.to(currentRoom).emit("board:user-left", {
