@@ -8,6 +8,7 @@ import { Canvas } from "../components/Canvas/Canvas";
 import { Toolbar } from "../components/Toolbar/Toolbar";
 import { CursorOverlay } from "../components/CursorOverlay/CursorOverlay";
 import { UserNamePrompt } from "../components/UserNamePrompt/UserNamePrompt";
+import { TextInput } from "../components/TextOverlay/TextInput";
 
 export function BoardPage() {
   const { token } = useParams<{ token: string }>();
@@ -41,7 +42,7 @@ function BoardPageInner({ token, displayName }: { token: string; displayName: st
   const lastCursorEmit = useRef(0);
 
   useSocketConnection(token, displayName);
-  const { toolManager, handleToolChange } = useBoard(token, displayName);
+  const { toolManager, handleToolChange, textPlacement, commitText, cancelText, onTextChange } = useBoard(token, displayName);
 
   // Emit cursor position (throttled)
   const handleMouseMove = (e: React.MouseEvent) => {
@@ -65,6 +66,15 @@ function BoardPageInner({ token, displayName }: { token: string; displayName: st
       >
         <Canvas toolManager={toolManager} />
         <CursorOverlay />
+        {textPlacement && (
+          <TextInput
+            x={textPlacement.x}
+            y={textPlacement.y}
+            onCommit={commitText}
+            onCancel={cancelText}
+            onChange={onTextChange}
+          />
+        )}
       </div>
     </div>
   );

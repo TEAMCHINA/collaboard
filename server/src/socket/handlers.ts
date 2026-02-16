@@ -54,11 +54,10 @@ export function registerHandlers(io: TypedServer, socket: TypedSocket): void {
     roomUsers.get(token)!.set(socket.id, currentUser);
 
     // Initialize board
-    getOrCreateBoard(token);
+    const board = getOrCreateBoard(token);
 
     // Send current state to joining user
     const elements = getBoardElements(token);
-    const board = getOrCreateBoard(token);
     socket.emit("board:state", { elements, seqNum: board.seqNum });
 
     // Send full user list to joining user
@@ -110,7 +109,6 @@ export function registerHandlers(io: TypedServer, socket: TypedSocket): void {
     if (!redoOp) return;
 
     const board = getOrCreateBoard(currentRoom);
-    // Re-apply the original operation
     const reapplied: Operation = {
       ...redoOp,
       id: generateId(),
@@ -152,7 +150,6 @@ export function registerHandlers(io: TypedServer, socket: TypedSocket): void {
 
   socket.on("user:update-name", (newName: string) => {
     if (!currentRoom || !currentUser) return;
-    const oldName = currentUser.displayName;
     currentUser.displayName = newName;
     const users = roomUsers.get(currentRoom);
     if (users) {
