@@ -11,6 +11,6 @@ interface ConnectionState {
 export const useConnectionStore = create<ConnectionState>((set) => ({
   connected: false,
   users: [],
-  setConnected: (connected: boolean) => set({ connected }),
+  setConnected: (connected: boolean) => set(connected ? { connected } : { connected, users: [] }),
   setUsers: (users: ConnectedUser[]) => set({ users }),
 }));

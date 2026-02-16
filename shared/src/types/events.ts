@@ -7,6 +7,7 @@ export interface ClientToServerEvents {
   "board:operation": (op: Operation) => void;
   "board:undo": () => void;
   "board:redo": () => void;
+  "board:clear": () => void;
   "board:drawing": (element: BoardElement | null) => void;
   "cursor:move": (data: { x: number; y: number }) => void;
   "user:update-color": (color: string) => void;

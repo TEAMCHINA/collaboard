@@ -36,10 +36,10 @@ export function BoardPage() {
     return <UserNamePrompt onSubmit={handleNameSubmit} />;
   }
 
-  return <BoardPageInner token={token} displayName={displayName} />;
+  return <BoardPageInner token={token} displayName={displayName} onNameChange={handleNameSubmit} />;
 }
 
-function BoardPageInner({ token, displayName }: { token: string; displayName: string }) {
+function BoardPageInner({ token, displayName, onNameChange }: { token: string; displayName: string; onNameChange: (name: string) => void }) {
   const lastCursorEmit = useRef(0);
 
   useSocketConnection(token, displayName);
@@ -60,7 +60,12 @@ function BoardPageInner({ token, displayName }: { token: string; displayName: st
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-      <Toolbar onToolChange={handleToolChange} />
+      <Toolbar
+        onToolChange={handleToolChange}
+        onClear={() => socket.emit("board:clear")}
+        displayName={displayName}
+        onNameChange={onNameChange}
+      />
       <div
         style={{ flex: 1, position: "relative", overflow: "hidden" }}
         onMouseMove={handleMouseMove}

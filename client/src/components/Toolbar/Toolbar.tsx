@@ -1,12 +1,16 @@
+import { useState, useRef, useEffect } from "react";
 import { useToolStore } from "../../store/tool-store";
 import { useConnectionStore } from "../../store/connection-store";
 import { ToolButton } from "./ToolButton";
 
 interface Props {
   onToolChange: (tool: string) => void;
+  onClear: () => void;
+  displayName: string;
+  onNameChange: (name: string) => void;
 }
 
-export function Toolbar({ onToolChange }: Props) {
+export function Toolbar({ onToolChange, onClear, displayName, onNameChange }: Props) {
   const activeTool = useToolStore((s) => s.activeTool);
   const penColor = useToolStore((s) => s.penColor);
   const penWidth = useToolStore((s) => s.penWidth);
@@ -18,6 +22,27 @@ export function Toolbar({ onToolChange }: Props) {
   const setTextColor = useToolStore((s) => s.setTextColor);
   const connected = useConnectionStore((s) => s.connected);
   const users = useConnectionStore((s) => s.users);
+
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(displayName);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (editing && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [editing]);
+
+  const commitName = () => {
+    const trimmed = draft.trim();
+    if (trimmed && trimmed !== displayName) {
+      onNameChange(trimmed);
+    } else {
+      setDraft(displayName);
+    }
+    setEditing(false);
+  };
 
   const handleToolSelect = (tool: string) => {
     useToolStore.getState().setActiveTool(tool);
@@ -83,7 +108,62 @@ export function Toolbar({ onToolChange }: Props) {
         </>
       )}
 
+      <div style={{ width: 1, height: 24, background: "#d1d5db" }} />
+      <button
+        onClick={onClear}
+        title="Clear all elements"
+        style={{
+          padding: "4px 10px",
+          fontSize: 13,
+          background: "transparent",
+          border: "1px solid #d1d5db",
+          borderRadius: 4,
+          cursor: "pointer",
+          color: "#dc2626",
+        }}
+      >
+        Clear
+      </button>
+
       <div style={{ flex: 1 }} />
+
+      {editing ? (
+        <input
+          ref={inputRef}
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") commitName();
+            if (e.key === "Escape") { setDraft(displayName); setEditing(false); }
+          }}
+          onBlur={commitName}
+          style={{
+            fontSize: 13,
+            padding: "2px 6px",
+            border: "1px solid #d1d5db",
+            borderRadius: 4,
+            outline: "none",
+            width: 120,
+          }}
+        />
+      ) : (
+        <span
+          onClick={() => { setDraft(displayName); setEditing(true); }}
+          style={{
+            fontSize: 13,
+            color: "#374151",
+            cursor: "pointer",
+            padding: "2px 6px",
+            borderRadius: 4,
+            border: "1px solid transparent",
+          }}
+          title="Click to change your name"
+        >
+          {displayName}
+        </span>
+      )}
+
+      <div style={{ width: 1, height: 24, background: "#d1d5db" }} />
 
       <span
         style={{
@@ -92,10 +172,9 @@ export function Toolbar({ onToolChange }: Props) {
           display: "flex",
           alignItems: "center",
           gap: 4,
-          position: "relative",
           cursor: "default",
         }}
-        title={users.map((u) => u.displayName).join("\n")}
+        title={connected ? users.map((u) => u.displayName).join("\n") : ""}
       >
         <span style={{
           width: 8,
@@ -104,7 +183,7 @@ export function Toolbar({ onToolChange }: Props) {
           background: connected ? "#16a34a" : "#dc2626",
           display: "inline-block",
         }} />
-        {users.length} online
+        {connected ? `${users.length} online` : "Offline"}
       </span>
     </div>
   );

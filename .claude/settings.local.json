@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "WebSearch",
-      "Bash(timeout 5 pnpm:*)"
+      "Bash(timeout 5 pnpm:*)",
+      "Bash(pnpm test)",
+      "Bash(pnpm --filter shared build:*)"
     ]
   }
 }

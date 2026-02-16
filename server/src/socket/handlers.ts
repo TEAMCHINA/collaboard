@@ -129,6 +129,31 @@ export function registerHandlers(io: TypedServer, socket: TypedSocket): void {
     io.to(currentRoom).emit("board:operation", stamped);
   });
 
+  socket.on("board:clear", () => {
+    if (!currentRoom || !currentUser) return;
+
+    const board = getOrCreateBoard(currentRoom);
+    const elements = getBoardElements(currentRoom);
+    if (elements.length === 0) return;
+
+    for (const el of elements) {
+      const removeOp: Operation = {
+        id: generateId(),
+        type: "removeElement",
+        boardToken: currentRoom,
+        owner: currentUser.displayName,
+        timestamp: Date.now(),
+        seqNum: 0,
+        elementId: el.id,
+        removedElement: el,
+      } as Operation;
+
+      const stamped = applyOp(board, removeOp);
+      pushOp(currentRoom, currentUser.displayName, stamped);
+      io.to(currentRoom).emit("board:operation", stamped);
+    }
+  });
+
   socket.on("board:drawing", (element) => {
     if (!currentRoom || !currentUser) return;
     socket.to(currentRoom).emit("board:drawing", {
