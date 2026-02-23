@@ -1,6 +1,7 @@
 import type { StrokeElement } from "shared";
+import { registerRenderer } from "./index";
 
-export function renderStroke(ctx: CanvasRenderingContext2D, element: StrokeElement): void {
+function renderStroke(ctx: CanvasRenderingContext2D, element: StrokeElement): void {
   const { points, color, width } = element;
   if (points.length < 2) return;
 
@@ -30,3 +31,5 @@ export function renderStroke(ctx: CanvasRenderingContext2D, element: StrokeEleme
   ctx.stroke();
   ctx.restore();
 }
+
+registerRenderer("stroke", (ctx, el) => renderStroke(ctx, el as StrokeElement));

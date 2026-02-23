@@ -1,6 +1,8 @@
 import type { BoardElement } from "shared";
 import type { IRenderer } from "./Renderer";
 import { getRenderer } from "./element-renderers";
+import "./element-renderers/stroke-renderer";
+import "./element-renderers/text-renderer";
 
 export class CanvasRenderer implements IRenderer {
   private bgCanvas: HTMLCanvasElement;

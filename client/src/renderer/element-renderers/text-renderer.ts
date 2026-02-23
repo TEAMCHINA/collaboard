@@ -1,6 +1,7 @@
 import type { TextElement } from "shared";
+import { registerRenderer } from "./index";
 
-export function renderText(ctx: CanvasRenderingContext2D, element: TextElement): void {
+function renderText(ctx: CanvasRenderingContext2D, element: TextElement): void {
   const { x, y, content, fontSize, fontFamily, color } = element;
   if (!content) return;
 
@@ -11,3 +12,5 @@ export function renderText(ctx: CanvasRenderingContext2D, element: TextElement):
   ctx.fillText(content, x, y);
   ctx.restore();
 }
+
+registerRenderer("text", (ctx, el) => renderText(ctx, el as TextElement));

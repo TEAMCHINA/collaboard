@@ -10,6 +10,34 @@ interface Props {
   onNameChange: (name: string) => void;
 }
 
+const recentSwatchStyle = (color: string, active: boolean): React.CSSProperties => ({
+  width: 16,
+  height: 16,
+  borderRadius: "50%",
+  background: color,
+  border: "none",
+  outline: active ? "2px solid #374151" : "1px solid #d1d5db",
+  outlineOffset: "1px",
+  cursor: "pointer",
+  padding: 0,
+  flexShrink: 0,
+});
+
+const recentPanelStyle: React.CSSProperties = {
+  position: "absolute",
+  top: "calc(100% + 6px)",
+  left: "50%",
+  transform: "translateX(-50%)",
+  background: "#fff",
+  border: "1px solid #e5e7eb",
+  borderRadius: 6,
+  padding: "5px 6px",
+  display: "flex",
+  gap: 4,
+  zIndex: 50,
+  boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+};
+
 export function Toolbar({ onToolChange, onClear, displayName, onNameChange }: Props) {
   const activeTool = useToolStore((s) => s.activeTool);
   const penColor = useToolStore((s) => s.penColor);
@@ -20,12 +48,16 @@ export function Toolbar({ onToolChange, onClear, displayName, onNameChange }: Pr
   const setFontSize = useToolStore((s) => s.setFontSize);
   const textColor = useToolStore((s) => s.textColor);
   const setTextColor = useToolStore((s) => s.setTextColor);
+  const recentColors = useToolStore((s) => s.recentColors);
+  const addRecentColor = useToolStore((s) => s.addRecentColor);
   const connected = useConnectionStore((s) => s.connected);
   const users = useConnectionStore((s) => s.users);
 
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(displayName);
   const inputRef = useRef<HTMLInputElement>(null);
+  const penColorRef = useRef<HTMLInputElement>(null);
+  const textColorRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (editing && inputRef.current) {
@@ -33,6 +65,23 @@ export function Toolbar({ onToolChange, onClear, displayName, onNameChange }: Pr
       inputRef.current.select();
     }
   }, [editing]);
+
+  // Native "change" fires when the picker dialog closes — add to recents
+  useEffect(() => {
+    const input = penColorRef.current;
+    if (!input) return;
+    const onCommit = () => addRecentColor(input.value);
+    input.addEventListener("change", onCommit);
+    return () => input.removeEventListener("change", onCommit);
+  }, [activeTool]);
+
+  useEffect(() => {
+    const input = textColorRef.current;
+    if (!input) return;
+    const onCommit = () => addRecentColor(input.value);
+    input.addEventListener("change", onCommit);
+    return () => input.removeEventListener("change", onCommit);
+  }, [activeTool]);
 
   const commitName = () => {
     const trimmed = draft.trim();
@@ -72,13 +121,28 @@ export function Toolbar({ onToolChange, onClear, displayName, onNameChange }: Pr
       {activeTool === "pen" && (
         <>
           <div style={{ width: 1, height: 24, background: "#d1d5db" }} />
-          <input
-            type="color"
-            value={penColor}
-            onChange={(e) => setPenColor(e.target.value)}
-            title="Pen color"
-            style={{ width: 32, height: 32, border: "none", cursor: "pointer", padding: 0 }}
-          />
+          <div style={{ position: "relative" }}>
+            <input
+              ref={penColorRef}
+              type="color"
+              value={penColor}
+              onChange={(e) => setPenColor(e.target.value)}
+              title="Pen color"
+              style={{ width: 32, height: 32, border: "none", cursor: "pointer", padding: 0, display: "block" }}
+            />
+            {recentColors.length > 0 && (
+              <div style={recentPanelStyle}>
+                {recentColors.map((c) => (
+                  <button
+                    key={c}
+                    title={c}
+                    onClick={() => { setPenColor(c); addRecentColor(c); }}
+                    style={recentSwatchStyle(c, c === penColor)}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
           <input
             type="range"
             min={1}
@@ -95,13 +159,28 @@ export function Toolbar({ onToolChange, onClear, displayName, onNameChange }: Pr
       {activeTool === "text" && (
         <>
           <div style={{ width: 1, height: 24, background: "#d1d5db" }} />
-          <input
-            type="color"
-            value={textColor}
-            onChange={(e) => setTextColor(e.target.value)}
-            title="Text color"
-            style={{ width: 32, height: 32, border: "none", cursor: "pointer", padding: 0 }}
-          />
+          <div style={{ position: "relative" }}>
+            <input
+              ref={textColorRef}
+              type="color"
+              value={textColor}
+              onChange={(e) => setTextColor(e.target.value)}
+              title="Text color"
+              style={{ width: 32, height: 32, border: "none", cursor: "pointer", padding: 0, display: "block" }}
+            />
+            {recentColors.length > 0 && (
+              <div style={recentPanelStyle}>
+                {recentColors.map((c) => (
+                  <button
+                    key={c}
+                    title={c}
+                    onClick={() => { setTextColor(c); addRecentColor(c); }}
+                    style={recentSwatchStyle(c, c === textColor)}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
           <input
             type="range"
             min={12}

@@ -11,9 +11,14 @@ RUN pnpm install --frozen-lockfile
 
 # Copy source and build
 COPY tsconfig.base.json ./
-COPY shared/ shared/
-COPY server/ server/
-COPY client/ client/
+COPY shared/src shared/src
+COPY shared/tsconfig.json shared/
+COPY server/src server/src
+COPY server/tsconfig.json server/
+COPY client/src client/src
+COPY client/tsconfig.json client/
+COPY client/index.html client/
+COPY client/vite.config.ts client/
 RUN pnpm build
 
 # Production image
