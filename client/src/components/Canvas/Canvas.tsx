@@ -90,9 +90,15 @@ export function Canvas({ toolManager }: Props) {
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.code === "Space" && !e.repeat) {
-        // Don't intercept if focus is on an input element
-        const tag = (document.activeElement as HTMLElement)?.tagName;
-        if (tag === "INPUT" || tag === "TEXTAREA") return;
+        const el = document.activeElement as HTMLInputElement;
+        const tag = el?.tagName;
+        // Don't intercept space when the user is typing in a text field
+        if (tag === "TEXTAREA") return;
+        if (tag === "INPUT" && el.type !== "color" && el.type !== "range") return;
+        // For non-text inputs (color picker, range slider), prevent their default
+        // space behavior and remove focus so pan takes over cleanly
+        e.preventDefault();
+        if (tag === "INPUT") el.blur();
         spaceHeld.current = true;
         if (activeCanvasRef.current) {
           activeCanvasRef.current.style.cursor = "grab";

@@ -4,9 +4,15 @@ import type { BoardElement } from "shared";
 export class ToolManager {
   private tools = new Map<string, ITool>();
   private activeTool: ITool | null = null;
+  private onActivate?: (name: string) => void;
+
+  setOnActivate(cb: (name: string) => void): void {
+    this.onActivate = cb;
+  }
 
   register(tool: ITool): void {
     this.tools.set(tool.name, tool);
+    tool.selectTool = () => this.setActiveTool(tool.name);
   }
 
   setActiveTool(name: string): void {
@@ -17,6 +23,7 @@ export class ToolManager {
     if (tool) {
       this.activeTool = tool;
       tool.activate();
+      this.onActivate?.(name);
     }
   }
 
@@ -42,5 +49,9 @@ export class ToolManager {
 
   getActiveTool(): ITool | null {
     return this.activeTool;
+  }
+
+  getTools(): ITool[] {
+    return Array.from(this.tools.values());
   }
 }

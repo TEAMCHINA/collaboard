@@ -45,7 +45,7 @@ function BoardPageInner({ token, displayName, onNameChange }: { token: string; d
   const lastCursorEmit = useRef(0);
 
   useSocketConnection(token, displayName);
-  const { toolManager, handleToolChange, textPlacement, commitText, cancelText, onTextChange } = useBoard(token, displayName);
+  const { toolManager, textPlacement, commitText, cancelText, onTextChange } = useBoard(token, displayName);
 
   // Emit cursor position in world coords (throttled)
   const handleMouseMove = (e: React.MouseEvent) => {
@@ -64,7 +64,7 @@ function BoardPageInner({ token, displayName, onNameChange }: { token: string; d
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <Toolbar
-        onToolChange={handleToolChange}
+        toolManager={toolManager}
         onClear={() => socket.emit("board:clear")}
         displayName={displayName}
         onNameChange={onNameChange}

@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { useToolStore } from "../../store/tool-store";
 import { useViewportStore } from "../../store/viewport-store";
+import { useTextOptions } from "../../tools/TextTool";
 
 interface Props {
   x: number;
@@ -14,8 +15,7 @@ export function TextInput({ x, y, onCommit, onCancel, onChange }: Props) {
   const [value, setValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const doneRef = useRef(false);
-  const fontSize = useToolStore((s) => s.fontSize);
-  const textColor = useToolStore((s) => s.textColor);
+  const { size: fontSize, color: textColor } = useTextOptions();
   const fontFamily = useToolStore((s) => s.fontFamily);
   const scale = useViewportStore((s) => s.scale);
 

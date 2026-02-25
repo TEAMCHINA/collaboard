@@ -12,7 +12,7 @@ export function useBoard(token: string, displayName: string) {
   const [textPlacement, setTextPlacement] = useState<TextPlacement | null>(null);
   const placementRef = useRef<TextPlacement | null>(null);
 
-  const toolManager = useMemo(() => {
+  const { toolManager, textTool } = useMemo(() => {
     const tm = new ToolManager();
 
     const commitOp = (op: Operation) => {
@@ -43,15 +43,15 @@ export function useBoard(token: string, displayName: string) {
     tm.register(text);
 
     tm.setActiveTool("pen");
-    return tm;
+    return { toolManager: tm, textTool: text };
   }, [token, displayName]);
 
-  const handleToolChange = useCallback((toolName: string) => {
-    // Cancel any open text input when switching tools
-    placementRef.current = null;
-    setTextPlacement(null);
-    useToolStore.getState().setActiveTool(toolName);
-    toolManager.setActiveTool(toolName);
+  useEffect(() => {
+    toolManager.setOnActivate((name) => {
+      placementRef.current = null;
+      setTextPlacement(null);
+      useToolStore.getState().setActiveTool(name);
+    });
   }, [toolManager]);
 
   // Keyboard shortcuts
@@ -72,12 +72,19 @@ export function useBoard(token: string, displayName: string) {
         return;
       }
       if (!inInput && !e.ctrlKey && !e.metaKey && !e.altKey) {
-        if (e.key === "p" || e.key === "P") {
-          handleToolChange("pen");
-          return;
+        for (const tool of toolManager.getTools()) {
+          if (tool.keybinds.includes(e.key)) {
+            tool.selectTool();
+            return;
+          }
         }
-        if (e.key === "t" || e.key === "T") {
-          handleToolChange("text");
+        if (e.key === "[" || e.key === "]") {
+          const tool = toolManager.getActiveTool();
+          if (!tool?.sizeConfig) return;
+          const { size } = tool.getOptions();
+          const delta = e.key === "[" ? -1 : 1;
+          const newSize = Math.max(tool.sizeConfig.min, Math.min(tool.sizeConfig.max, size + delta));
+          tool.setSize(newSize);
           return;
         }
       }
@@ -86,7 +93,7 @@ export function useBoard(token: string, displayName: string) {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [toolManager, handleToolChange]);
+  }, [toolManager]);
 
   const commitText = useCallback((content: string) => {
     const placement = placementRef.current;
@@ -99,7 +106,8 @@ export function useBoard(token: string, displayName: string) {
 
     if (!content.trim()) return;
 
-    const { fontSize, fontFamily, textColor } = useToolStore.getState();
+    const { size: fontSize, color: textColor } = textTool.getOptions();
+    const { fontFamily } = useToolStore.getState();
     const element: TextElement = {
       id: placement.id,
       type: "text",
@@ -125,7 +133,7 @@ export function useBoard(token: string, displayName: string) {
     };
 
     socket.emit("board:operation", op);
-  }, [token, displayName]);
+  }, [token, displayName, textTool]);
 
   const cancelText = useCallback(() => {
     placementRef.current = null;
@@ -137,7 +145,8 @@ export function useBoard(token: string, displayName: string) {
     const placement = placementRef.current;
     if (!placement) return;
 
-    const { fontSize, fontFamily, textColor } = useToolStore.getState();
+    const { size: fontSize, color: textColor } = textTool.getOptions();
+    const { fontFamily } = useToolStore.getState();
     const element: TextElement = {
       id: placement.id,
       type: "text",
@@ -152,7 +161,7 @@ export function useBoard(token: string, displayName: string) {
       color: textColor,
     };
     socket.emit("board:drawing", element);
-  }, [displayName]);
+  }, [displayName, textTool]);
 
-  return { toolManager, handleToolChange, textPlacement, commitText, cancelText, onTextChange };
+  return { toolManager, textPlacement, commitText, cancelText, onTextChange };
 }

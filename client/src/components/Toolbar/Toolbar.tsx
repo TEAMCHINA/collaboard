@@ -1,12 +1,13 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback, useSyncExternalStore } from "react";
 import { useToolStore } from "../../store/tool-store";
 import { useConnectionStore } from "../../store/connection-store";
 import { useViewportStore } from "../../store/viewport-store";
 import { ToolButton } from "./ToolButton";
 import { HelpButton } from "./HelpButton";
+import type { ToolManager } from "../../tools/ToolManager";
 
 interface Props {
-  onToolChange: (tool: string) => void;
+  toolManager: ToolManager;
   onClear: () => void;
   displayName: string;
   onNameChange: (name: string) => void;
@@ -40,16 +41,8 @@ const recentPanelStyle: React.CSSProperties = {
   boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
 };
 
-export function Toolbar({ onToolChange, onClear, displayName, onNameChange }: Props) {
-  const activeTool = useToolStore((s) => s.activeTool);
-  const penColor = useToolStore((s) => s.penColor);
-  const penWidth = useToolStore((s) => s.penWidth);
-  const setPenColor = useToolStore((s) => s.setPenColor);
-  const setPenWidth = useToolStore((s) => s.setPenWidth);
-  const fontSize = useToolStore((s) => s.fontSize);
-  const setFontSize = useToolStore((s) => s.setFontSize);
-  const textColor = useToolStore((s) => s.textColor);
-  const setTextColor = useToolStore((s) => s.setTextColor);
+export function Toolbar({ toolManager, onClear, displayName, onNameChange }: Props) {
+  const activeToolName = useToolStore((s) => s.activeTool);
   const recentColors = useToolStore((s) => s.recentColors);
   const addRecentColor = useToolStore((s) => s.addRecentColor);
   const connected = useConnectionStore((s) => s.connected);
@@ -59,8 +52,16 @@ export function Toolbar({ onToolChange, onClear, displayName, onNameChange }: Pr
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(displayName);
   const inputRef = useRef<HTMLInputElement>(null);
-  const penColorRef = useRef<HTMLInputElement>(null);
-  const textColorRef = useRef<HTMLInputElement>(null);
+  const colorInputRef = useRef<HTMLInputElement>(null);
+
+  const activeTool = toolManager.getActiveTool();
+  const activeOptions = useSyncExternalStore(
+    useCallback(
+      (notify) => activeTool?.subscribeOptions(notify) ?? (() => {}),
+      [activeTool],
+    ),
+    () => activeTool?.getOptions() ?? { size: 0, color: "#000000" },
+  );
 
   useEffect(() => {
     if (editing && inputRef.current) {
@@ -71,20 +72,12 @@ export function Toolbar({ onToolChange, onClear, displayName, onNameChange }: Pr
 
   // Native "change" fires when the picker dialog closes — add to recents
   useEffect(() => {
-    const input = penColorRef.current;
+    const input = colorInputRef.current;
     if (!input) return;
     const onCommit = () => addRecentColor(input.value);
     input.addEventListener("change", onCommit);
     return () => input.removeEventListener("change", onCommit);
-  }, [activeTool]);
-
-  useEffect(() => {
-    const input = textColorRef.current;
-    if (!input) return;
-    const onCommit = () => addRecentColor(input.value);
-    input.addEventListener("change", onCommit);
-    return () => input.removeEventListener("change", onCommit);
-  }, [activeTool]);
+  }, [activeToolName, addRecentColor]);
 
   const commitName = () => {
     const trimmed = draft.trim();
@@ -94,11 +87,6 @@ export function Toolbar({ onToolChange, onClear, displayName, onNameChange }: Pr
       setDraft(displayName);
     }
     setEditing(false);
-  };
-
-  const handleToolSelect = (tool: string) => {
-    useToolStore.getState().setActiveTool(tool);
-    onToolChange(tool);
   };
 
   return (
@@ -111,26 +99,27 @@ export function Toolbar({ onToolChange, onClear, displayName, onNameChange }: Pr
       borderBottom: "1px solid #e5e7eb",
       flexShrink: 0,
     }}>
-      <ToolButton title="Pen" active={activeTool === "pen"} onClick={() => handleToolSelect("pen")}>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-          <path d="m15 5 4 4" />
-        </svg>
-      </ToolButton>
-      <ToolButton title="Text" active={activeTool === "text"} onClick={() => handleToolSelect("text")}>
-        <span style={{ fontSize: 18, fontWeight: 700, fontFamily: "serif", lineHeight: 1 }}>T</span>
-      </ToolButton>
+      {toolManager.getTools().map(tool => (
+        <ToolButton
+          key={tool.name}
+          title={tool.label}
+          active={tool.name === activeToolName}
+          onClick={() => tool.selectTool()}
+        >
+          <tool.icon />
+        </ToolButton>
+      ))}
 
-      {activeTool === "pen" && (
+      {activeTool?.hasColor && (
         <>
           <div style={{ width: 1, height: 24, background: "#d1d5db" }} />
           <div style={{ position: "relative" }}>
             <input
-              ref={penColorRef}
+              ref={colorInputRef}
               type="color"
-              value={penColor}
-              onChange={(e) => setPenColor(e.target.value)}
-              title="Pen color"
+              value={activeOptions.color}
+              onChange={(e) => activeTool.setColor(e.target.value)}
+              title="Color"
               style={{ width: 32, height: 32, border: "none", cursor: "pointer", padding: 0, display: "block" }}
             />
             {recentColors.length > 0 && (
@@ -139,61 +128,28 @@ export function Toolbar({ onToolChange, onClear, displayName, onNameChange }: Pr
                   <button
                     key={c}
                     title={c}
-                    onClick={() => { setPenColor(c); addRecentColor(c); }}
-                    style={recentSwatchStyle(c, c === penColor)}
+                    onClick={() => { activeTool.setColor(c); addRecentColor(c); }}
+                    style={recentSwatchStyle(c, c === activeOptions.color)}
                   />
                 ))}
               </div>
             )}
           </div>
-          <input
-            type="range"
-            min={1}
-            max={20}
-            value={penWidth}
-            onChange={(e) => setPenWidth(Number(e.target.value))}
-            title={`Width: ${penWidth}`}
-            style={{ width: 80 }}
-          />
-          <span style={{ fontSize: 12, color: "#666", minWidth: 20 }}>{penWidth}px</span>
         </>
       )}
 
-      {activeTool === "text" && (
+      {activeTool?.sizeConfig && (
         <>
-          <div style={{ width: 1, height: 24, background: "#d1d5db" }} />
-          <div style={{ position: "relative" }}>
-            <input
-              ref={textColorRef}
-              type="color"
-              value={textColor}
-              onChange={(e) => setTextColor(e.target.value)}
-              title="Text color"
-              style={{ width: 32, height: 32, border: "none", cursor: "pointer", padding: 0, display: "block" }}
-            />
-            {recentColors.length > 0 && (
-              <div style={recentPanelStyle}>
-                {recentColors.map((c) => (
-                  <button
-                    key={c}
-                    title={c}
-                    onClick={() => { setTextColor(c); addRecentColor(c); }}
-                    style={recentSwatchStyle(c, c === textColor)}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
           <input
             type="range"
-            min={12}
-            max={72}
-            value={fontSize}
-            onChange={(e) => setFontSize(Number(e.target.value))}
-            title={`Font size: ${fontSize}`}
+            min={activeTool.sizeConfig.min}
+            max={activeTool.sizeConfig.max}
+            value={activeOptions.size}
+            onChange={(e) => activeTool.setSize(Number(e.target.value))}
+            title={`Size: ${activeOptions.size}`}
             style={{ width: 80 }}
           />
-          <span style={{ fontSize: 12, color: "#666", minWidth: 28 }}>{fontSize}px</span>
+          <span style={{ fontSize: 12, color: "#666", minWidth: 28 }}>{activeOptions.size}px</span>
         </>
       )}
 

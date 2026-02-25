@@ -1,10 +1,27 @@
+import { create } from "zustand";
+import type { FC } from "react";
 import type { StrokeElement, AddElementOp, BoardElement } from "shared";
 import { generateId } from "shared";
-import type { ITool, PointerEventData } from "./Tool";
-import { useToolStore } from "../store/tool-store";
+import type { ITool, PointerEventData, ToolOption } from "./Tool";
+
+const penStore = create<ToolOption>(() => ({ size: 3, color: "#000000" }));
+
+const PenIcon: FC = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+    <path d="m15 5 4 4" />
+  </svg>
+);
 
 export class PenTool implements ITool {
   name = "pen";
+  label = "Pen";
+  icon = PenIcon;
+  keybinds = ["p", "P"];
+  sizeConfig = { min: 1, max: 20 };
+  hasColor = true;
+  selectTool: () => void = () => {};
+
   private activeElement: StrokeElement | null = null;
   private drawing = false;
   private owner: string;
@@ -25,8 +42,13 @@ export class PenTool implements ITool {
     this.onDrawing = onDrawing;
   }
 
+  setSize(n: number) { penStore.setState({ size: n }); }
+  setColor(c: string) { penStore.setState({ color: c }); }
+  getOptions() { return penStore.getState(); }
+  subscribeOptions(cb: () => void) { return penStore.subscribe(cb); }
+
   onPointerDown(e: PointerEventData): void {
-    const { penColor, penWidth } = useToolStore.getState();
+    const { size: width, color } = penStore.getState();
     this.drawing = true;
     this.activeElement = {
       id: generateId(),
@@ -35,8 +57,8 @@ export class PenTool implements ITool {
       createdAt: Date.now(),
       zIndex: 0,
       points: [{ x: e.x, y: e.y }],
-      color: penColor,
-      width: penWidth,
+      color,
+      width,
     };
     this.emitDrawing();
   }

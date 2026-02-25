@@ -6,6 +6,7 @@ const SHORTCUTS: { group: string; rows: { keys: string[]; label: string }[] }[] 
     rows: [
       { keys: ["P"],  label: "Pen tool" },
       { keys: ["T"],  label: "Text tool" },
+      { keys: ["[ ]"],  label: "Decrease/Increase size" },
     ],
   },
   {
