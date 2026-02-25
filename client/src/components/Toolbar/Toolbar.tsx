@@ -3,6 +3,7 @@ import { useToolStore } from "../../store/tool-store";
 import { useConnectionStore } from "../../store/connection-store";
 import { useViewportStore } from "../../store/viewport-store";
 import { ToolButton } from "./ToolButton";
+import { HelpButton } from "./HelpButton";
 
 interface Props {
   onToolChange: (tool: string) => void;
@@ -271,6 +272,10 @@ export function Toolbar({ onToolChange, onClear, displayName, onNameChange }: Pr
           {displayName}
         </span>
       )}
+
+      <div style={{ width: 1, height: 24, background: "#d1d5db" }} />
+
+      <HelpButton />
 
       <div style={{ width: 1, height: 24, background: "#d1d5db" }} />
 
