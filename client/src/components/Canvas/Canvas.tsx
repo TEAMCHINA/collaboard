@@ -235,6 +235,7 @@ export function Canvas({ toolManager }: Props) {
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
+        onMouseDown={(e) => e.preventDefault()}
       />
     </div>
   );

@@ -17,6 +17,9 @@ export class CanvasRenderer implements IRenderer {
   private activeCanvas: HTMLCanvasElement;
   private bgCtx: CanvasRenderingContext2D;
   private activeCtx: CanvasRenderingContext2D;
+  // CSS pixel dimensions (the logical coordinate extent with DPR scale applied)
+  private cssWidth = 0;
+  private cssHeight = 0;
 
   constructor(bgCanvas: HTMLCanvasElement, activeCanvas: HTMLCanvasElement) {
     this.bgCanvas = bgCanvas;
@@ -27,7 +30,7 @@ export class CanvasRenderer implements IRenderer {
 
   render(elements: BoardElement[], viewport: Viewport = IDENTITY): void {
     const ctx = this.bgCtx;
-    ctx.clearRect(0, 0, this.bgCanvas.width, this.bgCanvas.height);
+    ctx.clearRect(0, 0, this.cssWidth, this.cssHeight);
     ctx.save();
     ctx.translate(viewport.panX, viewport.panY);
     ctx.scale(viewport.scale, viewport.scale);
@@ -42,7 +45,7 @@ export class CanvasRenderer implements IRenderer {
 
   renderActiveElement(localElement: BoardElement | null, remoteElements: BoardElement[] = [], viewport: Viewport = IDENTITY): void {
     const ctx = this.activeCtx;
-    ctx.clearRect(0, 0, this.activeCanvas.width, this.activeCanvas.height);
+    ctx.clearRect(0, 0, this.cssWidth, this.cssHeight);
     ctx.save();
     ctx.translate(viewport.panX, viewport.panY);
     ctx.scale(viewport.scale, viewport.scale);
@@ -62,12 +65,14 @@ export class CanvasRenderer implements IRenderer {
   }
 
   clear(): void {
-    this.bgCtx.clearRect(0, 0, this.bgCanvas.width, this.bgCanvas.height);
-    this.activeCtx.clearRect(0, 0, this.activeCanvas.width, this.activeCanvas.height);
+    this.bgCtx.clearRect(0, 0, this.cssWidth, this.cssHeight);
+    this.activeCtx.clearRect(0, 0, this.cssWidth, this.cssHeight);
   }
 
   resize(width: number, height: number): void {
     const dpr = window.devicePixelRatio || 1;
+    this.cssWidth = width;
+    this.cssHeight = height;
     for (const canvas of [this.bgCanvas, this.activeCanvas]) {
       canvas.width = width * dpr;
       canvas.height = height * dpr;

@@ -46,9 +46,21 @@ export function useBoard(token: string, displayName: string) {
     return tm;
   }, [token, displayName]);
 
+  const handleToolChange = useCallback((toolName: string) => {
+    // Cancel any open text input when switching tools
+    placementRef.current = null;
+    setTextPlacement(null);
+    useToolStore.getState().setActiveTool(toolName);
+    toolManager.setActiveTool(toolName);
+  }, [toolManager]);
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't steal keys when typing in an input
+      const tag = (document.activeElement as HTMLElement)?.tagName;
+      const inInput = tag === "INPUT" || tag === "TEXTAREA";
+
       if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
         e.preventDefault();
         socket.emit("board:undo");
@@ -59,19 +71,22 @@ export function useBoard(token: string, displayName: string) {
         socket.emit("board:redo");
         return;
       }
+      if (!inInput && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        if (e.key === "p" || e.key === "P") {
+          handleToolChange("pen");
+          return;
+        }
+        if (e.key === "t" || e.key === "T") {
+          handleToolChange("text");
+          return;
+        }
+      }
       toolManager.onKeyDown(e);
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [toolManager]);
-
-  const handleToolChange = useCallback((toolName: string) => {
-    // Cancel any open text input when switching tools
-    placementRef.current = null;
-    setTextPlacement(null);
-    toolManager.setActiveTool(toolName);
-  }, [toolManager]);
+  }, [toolManager, handleToolChange]);
 
   const commitText = useCallback((content: string) => {
     const placement = placementRef.current;

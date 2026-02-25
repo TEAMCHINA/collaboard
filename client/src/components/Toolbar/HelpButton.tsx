@@ -2,6 +2,13 @@ import { useState } from "react";
 
 const SHORTCUTS: { group: string; rows: { keys: string[]; label: string }[] }[] = [
   {
+    group: "Tools",
+    rows: [
+      { keys: ["P"],  label: "Pen tool" },
+      { keys: ["T"],  label: "Text tool" },
+    ],
+  },
+  {
     group: "History",
     rows: [
       { keys: ["Ctrl", "Z"],           label: "Undo" },
