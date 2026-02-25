@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useToolStore } from "../../store/tool-store";
 import { useConnectionStore } from "../../store/connection-store";
+import { useViewportStore } from "../../store/viewport-store";
 import { ToolButton } from "./ToolButton";
 
 interface Props {
@@ -52,6 +53,7 @@ export function Toolbar({ onToolChange, onClear, displayName, onNameChange }: Pr
   const addRecentColor = useToolStore((s) => s.addRecentColor);
   const connected = useConnectionStore((s) => s.connected);
   const users = useConnectionStore((s) => s.users);
+  const scale = useViewportStore((s) => s.scale);
 
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(displayName);
@@ -212,6 +214,27 @@ export function Toolbar({ onToolChange, onClear, displayName, onNameChange }: Pr
       </button>
 
       <div style={{ flex: 1 }} />
+
+      {/* Zoom controls */}
+      <span style={{ fontSize: 12, color: "#374151", minWidth: 40, textAlign: "right" }}>
+        {Math.round(scale * 100)}%
+      </span>
+      <button
+        onClick={() => useViewportStore.getState().reset()}
+        title="Reset view (100%, centered)"
+        style={{
+          padding: "4px 8px",
+          fontSize: 12,
+          background: "transparent",
+          border: "1px solid #d1d5db",
+          borderRadius: 4,
+          cursor: "pointer",
+          color: "#374151",
+        }}
+      >
+        Reset View
+      </button>
+      <div style={{ width: 1, height: 24, background: "#d1d5db" }} />
 
       {editing ? (
         <input

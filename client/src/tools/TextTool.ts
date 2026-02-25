@@ -3,8 +3,10 @@ import type { ITool, PointerEventData } from "./Tool";
 
 export interface TextPlacement {
   id: string;
-  x: number;
-  y: number;
+  x: number;       // world
+  y: number;       // world
+  screenX: number;
+  screenY: number;
 }
 
 export class TextTool implements ITool {

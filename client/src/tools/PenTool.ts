@@ -51,6 +51,10 @@ export class PenTool implements ITool {
     if (!this.drawing || !this.activeElement) return;
     this.drawing = false;
 
+    if (this.activeElement.points.length === 1) {
+      this.activeElement.points.push({ ...this.activeElement.points[0] });
+    }
+
     if (this.activeElement.points.length >= 2) {
       const op: AddElementOp = {
         id: generateId(),

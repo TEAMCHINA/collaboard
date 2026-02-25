@@ -3,6 +3,7 @@ import type { Operation, BoardElement, TextElement, AddElementOp } from "shared"
 import { generateId } from "shared";
 import { socket } from "../socket/socket-client";
 import { useToolStore } from "../store/tool-store";
+import { useViewportStore } from "../store/viewport-store";
 import { ToolManager } from "../tools/ToolManager";
 import { PenTool } from "../tools/PenTool";
 import { TextTool, type TextPlacement } from "../tools/TextTool";
@@ -28,7 +29,14 @@ export function useBoard(token: string, displayName: string) {
     const text = new TextTool((x: number, y: number) => {
       // If there's an active text input, let blur handle commit — don't overwrite
       if (placementRef.current) return;
-      const placement = { id: generateId(), x, y };
+      const { panX, panY, scale } = useViewportStore.getState();
+      const placement: TextPlacement = {
+        id: generateId(),
+        x,
+        y,
+        screenX: x * scale + panX,
+        screenY: y * scale + panY,
+      };
       placementRef.current = placement;
       setTextPlacement(placement);
     });

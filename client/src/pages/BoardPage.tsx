@@ -4,6 +4,7 @@ import { useUserStore } from "../store/user-store";
 import { useSocketConnection } from "../socket/socket-hooks";
 import { useBoard } from "../hooks/useBoard";
 import { socket } from "../socket/socket-client";
+import { useViewportStore } from "../store/viewport-store";
 import { Canvas } from "../components/Canvas/Canvas";
 import { Toolbar } from "../components/Toolbar/Toolbar";
 import { CursorOverlay } from "../components/CursorOverlay/CursorOverlay";
@@ -46,15 +47,16 @@ function BoardPageInner({ token, displayName, onNameChange }: { token: string; d
   useSocketConnection(token, displayName);
   const { toolManager, handleToolChange, textPlacement, commitText, cancelText, onTextChange } = useBoard(token, displayName);
 
-  // Emit cursor position (throttled)
+  // Emit cursor position in world coords (throttled)
   const handleMouseMove = (e: React.MouseEvent) => {
     const now = Date.now();
     if (now - lastCursorEmit.current > 50) {
       lastCursorEmit.current = now;
       const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+      const { panX, panY, scale } = useViewportStore.getState();
       socket.emit("cursor:move", {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
+        x: (e.clientX - rect.left - panX) / scale,
+        y: (e.clientY - rect.top - panY) / scale,
       });
     }
   };
@@ -75,8 +77,8 @@ function BoardPageInner({ token, displayName, onNameChange }: { token: string; d
         <CursorOverlay />
         {textPlacement && (
           <TextInput
-            x={textPlacement.x}
-            y={textPlacement.y}
+            x={textPlacement.screenX}
+            y={textPlacement.screenY}
             onCommit={commitText}
             onCancel={cancelText}
             onChange={onTextChange}

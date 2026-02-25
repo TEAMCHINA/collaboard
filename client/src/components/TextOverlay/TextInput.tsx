@@ -1,5 +1,6 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useToolStore } from "../../store/tool-store";
+import { useViewportStore } from "../../store/viewport-store";
 
 interface Props {
   x: number;
@@ -16,12 +17,7 @@ export function TextInput({ x, y, onCommit, onCancel, onChange }: Props) {
   const fontSize = useToolStore((s) => s.fontSize);
   const textColor = useToolStore((s) => s.textColor);
   const fontFamily = useToolStore((s) => s.fontFamily);
-
-  useEffect(() => {
-    requestAnimationFrame(() => {
-      inputRef.current?.focus();
-    });
-  }, []);
+  const scale = useViewportStore((s) => s.scale);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
@@ -59,6 +55,7 @@ export function TextInput({ x, y, onCommit, onCancel, onChange }: Props) {
   return (
     <input
       ref={inputRef}
+      autoFocus
       value={value}
       onChange={handleChange}
       onKeyDown={handleKeyDown}
@@ -67,7 +64,7 @@ export function TextInput({ x, y, onCommit, onCancel, onChange }: Props) {
         position: "absolute",
         left: x,
         top: y,
-        fontSize,
+        fontSize: fontSize * scale,
         fontFamily,
         color: textColor,
         background: "transparent",

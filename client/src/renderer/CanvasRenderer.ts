@@ -4,6 +4,14 @@ import { getRenderer } from "./element-renderers";
 import "./element-renderers/stroke-renderer";
 import "./element-renderers/text-renderer";
 
+export interface Viewport {
+  panX: number;
+  panY: number;
+  scale: number;
+}
+
+const IDENTITY: Viewport = { panX: 0, panY: 0, scale: 1 };
+
 export class CanvasRenderer implements IRenderer {
   private bgCanvas: HTMLCanvasElement;
   private activeCanvas: HTMLCanvasElement;
@@ -17,30 +25,40 @@ export class CanvasRenderer implements IRenderer {
     this.activeCtx = activeCanvas.getContext("2d")!;
   }
 
-  render(elements: BoardElement[]): void {
-    this.bgCtx.clearRect(0, 0, this.bgCanvas.width, this.bgCanvas.height);
+  render(elements: BoardElement[], viewport: Viewport = IDENTITY): void {
+    const ctx = this.bgCtx;
+    ctx.clearRect(0, 0, this.bgCanvas.width, this.bgCanvas.height);
+    ctx.save();
+    ctx.translate(viewport.panX, viewport.panY);
+    ctx.scale(viewport.scale, viewport.scale);
     for (const el of elements) {
       const renderFn = getRenderer(el.type);
       if (renderFn) {
-        renderFn(this.bgCtx, el);
+        renderFn(ctx, el);
       }
     }
+    ctx.restore();
   }
 
-  renderActiveElement(localElement: BoardElement | null, remoteElements: BoardElement[] = []): void {
-    this.activeCtx.clearRect(0, 0, this.activeCanvas.width, this.activeCanvas.height);
+  renderActiveElement(localElement: BoardElement | null, remoteElements: BoardElement[] = [], viewport: Viewport = IDENTITY): void {
+    const ctx = this.activeCtx;
+    ctx.clearRect(0, 0, this.activeCanvas.width, this.activeCanvas.height);
+    ctx.save();
+    ctx.translate(viewport.panX, viewport.panY);
+    ctx.scale(viewport.scale, viewport.scale);
     for (const el of remoteElements) {
       const renderFn = getRenderer(el.type);
       if (renderFn) {
-        renderFn(this.activeCtx, el);
+        renderFn(ctx, el);
       }
     }
     if (localElement) {
       const renderFn = getRenderer(localElement.type);
       if (renderFn) {
-        renderFn(this.activeCtx, localElement);
+        renderFn(ctx, localElement);
       }
     }
+    ctx.restore();
   }
 
   clear(): void {
