@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback } from "react";
+import { useRef, useEffect, useCallback, forwardRef, useImperativeHandle } from "react";
 import { useBoardStore } from "../../store/board-store";
 import { useDrawingStore } from "../../store/drawing-store";
 import { useViewportStore } from "../../store/viewport-store";
@@ -10,7 +10,11 @@ interface Props {
   toolManager: ToolManager;
 }
 
-export function Canvas({ toolManager }: Props) {
+export interface CanvasHandle {
+  downloadAsJpg: () => void;
+}
+
+export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ toolManager }, ref) {
   const containerRef = useRef<HTMLDivElement>(null);
   const bgCanvasRef = useRef<HTMLCanvasElement>(null);
   const activeCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -41,6 +45,27 @@ export function Canvas({ toolManager }: Props) {
       rendererRef.current.resize(size.width, size.height);
     }
   }, [size]);
+
+  useImperativeHandle(ref, () => ({
+    downloadAsJpg() {
+      const bg = bgCanvasRef.current;
+      const active = activeCanvasRef.current;
+      if (!bg) return;
+      const temp = document.createElement("canvas");
+      temp.width = bg.width;
+      temp.height = bg.height;
+      const ctx = temp.getContext("2d")!;
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, temp.width, temp.height);
+      ctx.drawImage(bg, 0, 0);
+      if (active) ctx.drawImage(active, 0, 0);
+      const url = temp.toDataURL("image/jpeg", 0.92);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "collaboard.jpg";
+      link.click();
+    },
+  }), []);
 
   // Animation loop: render committed elements + active element
   useEffect(() => {
@@ -245,4 +270,4 @@ export function Canvas({ toolManager }: Props) {
       />
     </div>
   );
-}
+});

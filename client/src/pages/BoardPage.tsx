@@ -5,7 +5,7 @@ import { useSocketConnection } from "../socket/socket-hooks";
 import { useBoard } from "../hooks/useBoard";
 import { socket } from "../socket/socket-client";
 import { useViewportStore } from "../store/viewport-store";
-import { Canvas } from "../components/Canvas/Canvas";
+import { Canvas, type CanvasHandle } from "../components/Canvas/Canvas";
 import { Toolbar } from "../components/Toolbar/Toolbar";
 import { CursorOverlay } from "../components/CursorOverlay/CursorOverlay";
 import { UserNamePrompt } from "../components/UserNamePrompt/UserNamePrompt";
@@ -43,6 +43,7 @@ export function BoardPage() {
 
 function BoardPageInner({ token, displayName, onNameChange }: { token: string; displayName: string; onNameChange: (name: string) => void }) {
   const lastCursorEmit = useRef(0);
+  const canvasRef = useRef<CanvasHandle>(null);
 
   useSocketConnection(token, displayName);
   const { toolManager, textPlacement, commitText, cancelText, onTextChange } = useBoard(token, displayName);
@@ -66,6 +67,7 @@ function BoardPageInner({ token, displayName, onNameChange }: { token: string; d
       <Toolbar
         toolManager={toolManager}
         onClear={() => socket.emit("board:clear")}
+        onDownload={() => canvasRef.current?.downloadAsJpg()}
         displayName={displayName}
         onNameChange={onNameChange}
       />
@@ -73,7 +75,7 @@ function BoardPageInner({ token, displayName, onNameChange }: { token: string; d
         style={{ flex: 1, position: "relative", overflow: "hidden" }}
         onMouseMove={handleMouseMove}
       >
-        <Canvas toolManager={toolManager} />
+        <Canvas ref={canvasRef} toolManager={toolManager} />
         <CursorOverlay />
         {textPlacement && (
           <TextInput

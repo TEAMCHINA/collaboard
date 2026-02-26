@@ -9,6 +9,7 @@ import type { ToolManager } from "../../tools/ToolManager";
 interface Props {
   toolManager: ToolManager;
   onClear: () => void;
+  onDownload: () => void;
   displayName: string;
   onNameChange: (name: string) => void;
 }
@@ -41,7 +42,7 @@ const recentPanelStyle: React.CSSProperties = {
   boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
 };
 
-export function Toolbar({ toolManager, onClear, displayName, onNameChange }: Props) {
+export function Toolbar({ toolManager, onClear, onDownload, displayName, onNameChange }: Props) {
   const activeToolName = useToolStore((s) => s.activeTool);
   const recentColors = useToolStore((s) => s.recentColors);
   const addRecentColor = useToolStore((s) => s.addRecentColor);
@@ -190,6 +191,28 @@ export function Toolbar({ toolManager, onClear, displayName, onNameChange }: Pro
         }}
       >
         Reset View
+      </button>
+      <button
+        onClick={onDownload}
+        title="Download as JPG"
+        style={{
+          padding: "4px 8px",
+          fontSize: 12,
+          background: "transparent",
+          border: "1px solid #d1d5db",
+          borderRadius: 4,
+          cursor: "pointer",
+          color: "#374151",
+          display: "flex",
+          alignItems: "center",
+          gap: 4,
+        }}
+      >
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M8 2v8" />
+          <path d="M5 7l3 3 3-3" />
+          <path d="M3 13h10" />
+        </svg>
       </button>
       <div style={{ width: 1, height: 24, background: "#d1d5db" }} />
 
