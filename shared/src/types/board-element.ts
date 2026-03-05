@@ -23,4 +23,13 @@ export interface TextElement extends BaseElement {
   color: string;
 }
 
-export type BoardElement = StrokeElement | TextElement;
+export interface ImageElement extends BaseElement {
+  type: "image";
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  dataUrl: string;
+}
+
+export type BoardElement = StrokeElement | TextElement | ImageElement;

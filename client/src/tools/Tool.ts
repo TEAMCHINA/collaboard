@@ -19,6 +19,8 @@ export interface ITool {
   keybinds: string[];
   sizeConfig: { min: number; max: number } | null;
   hasColor: boolean;
+  hidden?: boolean;
+  getCursor?(): string;
   selectTool(): void;
   setSize(n: number): void;
   setColor(c: string): void;

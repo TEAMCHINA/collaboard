@@ -3,6 +3,7 @@ import type { IRenderer } from "./Renderer";
 import { getRenderer } from "./element-renderers";
 import "./element-renderers/stroke-renderer";
 import "./element-renderers/text-renderer";
+import "./element-renderers/image-renderer";
 
 export interface Viewport {
   panX: number;

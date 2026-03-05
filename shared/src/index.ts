@@ -1,4 +1,4 @@
-export type { BaseElement, StrokeElement, TextElement, BoardElement } from "./types/board-element.js";
+export type { BaseElement, StrokeElement, TextElement, ImageElement, BoardElement } from "./types/board-element.js";
 export type { BaseOperation, AddElementOp, RemoveElementOp, UpdateElementOp, Operation } from "./types/operation.js";
 export type { BoardState, BoardSnapshot } from "./types/board.js";
 export type { ConnectedUser } from "./types/user.js";

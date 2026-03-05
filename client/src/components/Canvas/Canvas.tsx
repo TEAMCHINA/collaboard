@@ -182,6 +182,11 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ toolMana
 
     const point = getCanvasPoint(e);
     toolManager.onPointerDown({ ...point, pressure: e.pressure });
+    if (activeCanvasRef.current) {
+      const cur = toolManager.getActiveTool()?.getCursor?.() ?? "crosshair";
+      activeCanvasRef.current.style.cursor = cur;
+      cursorRef.current = cur as typeof cursorRef.current;
+    }
     activeCanvasRef.current?.setPointerCapture(e.pointerId);
   }, [toolManager, getCanvasPoint]);
 
@@ -226,6 +231,11 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ toolMana
 
     const point = getCanvasPoint(e);
     toolManager.onPointerMove({ ...point, pressure: e.pressure });
+    if (!isPanning.current && !spaceHeld.current && activeCanvasRef.current) {
+      const cur = toolManager.getActiveTool()?.getCursor?.() ?? "crosshair";
+      activeCanvasRef.current.style.cursor = cur;
+      cursorRef.current = cur as typeof cursorRef.current;
+    }
   }, [toolManager, getCanvasPoint]);
 
   const handlePointerUp = useCallback((e: React.PointerEvent) => {

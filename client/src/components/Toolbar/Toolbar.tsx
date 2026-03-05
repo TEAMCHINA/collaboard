@@ -100,7 +100,7 @@ export function Toolbar({ toolManager, onClear, onDownload, displayName, onNameC
       borderBottom: "1px solid #e5e7eb",
       flexShrink: 0,
     }}>
-      {toolManager.getTools().map(tool => (
+      {toolManager.getTools().filter(t => !t.hidden).map(tool => (
         <ToolButton
           key={tool.name}
           title={tool.label}

@@ -33,6 +33,16 @@ const SHORTCUTS: { group: string; rows: { keys: string[]; label: string }[] }[] 
       { keys: ["Esc"],                 label: "Cancel text" },
     ],
   },
+  {
+    group: "Image paste",
+    rows: [
+      { keys: ["Ctrl", "V"],  label: "Paste image / image URL" },
+      { keys: ["Click"],      label: "Anchor top-left corner" },
+      { keys: ["Shift"],      label: "Lock aspect ratio" },
+      { keys: ["Click"],      label: "Confirm & broadcast" },
+      { keys: ["Esc"],        label: "Cancel" },
+    ],
+  },
 ];
 
 function Kbd({ children }: { children: string }) {
