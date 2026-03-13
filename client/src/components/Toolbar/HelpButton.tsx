@@ -20,7 +20,7 @@ const SHORTCUTS: { group: string; rows: { keys: string[]; label: string }[] }[] 
   {
     group: "Navigation",
     rows: [
-      { keys: ["Mouse Wheel"],              label: "Zoom in / out" },
+      { keys: ["Mouse Wheel"],         label: "Zoom in / out" },
       { keys: ["Space", "drag"],       label: "Pan canvas" },
       { keys: ["Middle", "drag"],      label: "Pan canvas" },
       { keys: ["Pinch"],               label: "Zoom (touch)" },
@@ -37,20 +37,21 @@ const SHORTCUTS: { group: string; rows: { keys: string[]; label: string }[] }[] 
   {
     group: "Rectangle tool",
     rows: [
-      { keys: ["Click"],  label: "Anchor top-left corner" },
-      { keys: ["Shift"],  label: "Lock to square" },
-      { keys: ["Click"],  label: "Confirm & broadcast" },
-      { keys: ["Esc"],    label: "Cancel" },
+      { keys: ["Click", "drag"],  label: "Draw rectangle" },
+      { keys: ["Click"],          label: "Anchor top-left corner" },
+      { keys: ["Click"],          label: "Confirm" },
+      { keys: ["Shift"],          label: "Lock to square" },
+      { keys: ["Esc"],            label: "Cancel" },
     ],
   },
   {
     group: "Image paste",
     rows: [
-      { keys: ["Ctrl", "V"],  label: "Paste image / image URL" },
-      { keys: ["Click"],      label: "Anchor top-left corner" },
-      { keys: ["Shift"],      label: "Lock aspect ratio" },
-      { keys: ["Click"],      label: "Confirm & broadcast" },
-      { keys: ["Esc"],        label: "Cancel" },
+      { keys: ["Ctrl", "V"],      label: "Paste image / image URL" },
+      { keys: ["Click"],          label: "Anchor top-left corner" },
+      { keys: ["Shift"],          label: "Lock aspect ratio" },
+      { keys: ["Click"],          label: "Confirm" },
+      { keys: ["Esc"],            label: "Cancel" },
     ],
   },
 ];

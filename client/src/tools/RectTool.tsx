@@ -21,7 +21,9 @@ const RectIcon: FC = () => (
   </svg>
 );
 
-type Phase = "idle" | "anchored";
+type Phase = "idle" | "pressing" | "dragging" | "anchored";
+
+const DRAG_THRESHOLD = 4;
 
 export class RectTool implements ITool {
   name = "rect";
@@ -61,7 +63,7 @@ export class RectTool implements ITool {
         this.shiftHeld = true;
         this.emitPreview();
       }
-      if (e.key === "Escape" && this.phase === "anchored") {
+      if (e.key === "Escape" && this.phase !== "idle") {
         this.phase = "idle";
         this.anchor = null;
         this.onDrawing(null);
@@ -100,63 +102,54 @@ export class RectTool implements ITool {
     if (this.phase === "idle") {
       this.anchor = { x: e.x, y: e.y };
       this.cursor = { x: e.x, y: e.y };
-      this.phase = "anchored";
-      this.emitPreview();
+      this.phase = "pressing";
       return;
     }
 
     if (this.phase === "anchored" && this.anchor) {
       const { x, y, w, h } = this.getDisplayRect();
-      if (w < 3 || h < 3) {
-        this.phase = "idle";
-        this.anchor = null;
-        this.onDrawing(null);
-        return;
+      if (w >= 3 && h >= 3) {
+        this.commit(x, y, w, h);
+      } else {
+        this.cancel();
       }
-
-      const { size: strokeWidth, color } = rectStore.getState();
-      const element: RectElement = {
-        id: generateId(),
-        type: "rect",
-        owner: this.owner,
-        createdAt: Date.now(),
-        zIndex: 0,
-        x,
-        y,
-        width: w,
-        height: h,
-        color,
-        strokeWidth,
-      };
-
-      const op: AddElementOp = {
-        id: generateId(),
-        type: "addElement",
-        boardToken: this.boardToken,
-        owner: this.owner,
-        timestamp: Date.now(),
-        seqNum: 0,
-        element,
-      };
-
-      this.onCommit(op);
-      this.phase = "idle";
-      this.anchor = null;
-      this.onDrawing(null);
     }
   }
 
   onPointerMove(e: PointerEventData): void {
     this.cursor = { x: e.x, y: e.y };
-    if (this.phase === "anchored") {
+    if (this.phase === "pressing") {
+      const dx = e.x - this.anchor!.x;
+      const dy = e.y - this.anchor!.y;
+      if (Math.hypot(dx, dy) > DRAG_THRESHOLD) {
+        this.phase = "dragging";
+      }
+    }
+    if (this.phase !== "idle") {
       this.emitPreview();
     }
   }
 
-  onPointerUp(_e: PointerEventData): void {}
+  onPointerUp(_e: PointerEventData): void {
+    if (this.phase === "pressing") {
+      // Short click — enter two-click mode
+      this.phase = "anchored";
+      this.emitPreview();
+      return;
+    }
+
+    if (this.phase === "dragging") {
+      const { x, y, w, h } = this.getDisplayRect();
+      if (w >= 3 && h >= 3) {
+        this.commit(x, y, w, h);
+      } else {
+        this.cancel();
+      }
+    }
+  }
 
   getActiveElement(): RectElement | null {
-    if (this.phase !== "anchored" || !this.anchor) return null;
+    if (this.phase === "idle" || !this.anchor) return null;
     const { x, y, w, h } = this.getDisplayRect();
     const el: RectElement & { _preview?: true } = {
       id: "__rect_preview__",
@@ -173,6 +166,40 @@ export class RectTool implements ITool {
     };
     el._preview = true;
     return el;
+  }
+
+  private commit(x: number, y: number, w: number, h: number): void {
+    const { size: strokeWidth, color } = rectStore.getState();
+    const element: RectElement = {
+      id: generateId(),
+      type: "rect",
+      owner: this.owner,
+      createdAt: Date.now(),
+      zIndex: 0,
+      x,
+      y,
+      width: w,
+      height: h,
+      color,
+      strokeWidth,
+    };
+    const op: AddElementOp = {
+      id: generateId(),
+      type: "addElement",
+      boardToken: this.boardToken,
+      owner: this.owner,
+      timestamp: Date.now(),
+      seqNum: 0,
+      element,
+    };
+    this.onCommit(op);
+    this.cancel();
+  }
+
+  private cancel(): void {
+    this.phase = "idle";
+    this.anchor = null;
+    this.onDrawing(null);
   }
 
   private getDisplayRect(): { x: number; y: number; w: number; h: number } {
