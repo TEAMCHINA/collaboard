@@ -19,6 +19,8 @@ COPY client/src client/src
 COPY client/tsconfig.json client/
 COPY client/index.html client/
 COPY client/vite.config.ts client/
+ARG VITE_APP_VERSION=dev
+ENV VITE_APP_VERSION=$VITE_APP_VERSION
 RUN pnpm build
 
 # Production image

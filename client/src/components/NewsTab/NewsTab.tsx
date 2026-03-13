@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useCommits } from "../../hooks/useCommits";
 
 const SEE_ALL_URL = "https://github.com/teamchina/collaboard/commits/main";
-const TAB_LABEL = "NEWS";
+const TAB_LABEL = import.meta.env.VITE_APP_VERSION ?? "NEWS";
 
 export function NewsTab() {
   const { commits, hasNew, markSeen } = useCommits();

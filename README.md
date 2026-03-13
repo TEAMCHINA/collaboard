@@ -54,8 +54,7 @@ docker compose up --build
 Build and push for deployment (e.g. Raspberry Pi):
 
 ```bash
-docker build -t <dockerhub-user>/collaboard:latest .
-docker push <dockerhub-user>/collaboard:latest
+docker buildx build --platform linux/amd64,linux/arm64 -t <dockerhub-user>/collaboard:latest --push .
 ```
 
 A deployment compose file is in `deploy/docker-compose.yml` — update the image name and pull on your server:
