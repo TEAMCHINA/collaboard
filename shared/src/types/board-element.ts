@@ -32,4 +32,14 @@ export interface ImageElement extends BaseElement {
   dataUrl: string;
 }
 
-export type BoardElement = StrokeElement | TextElement | ImageElement;
+export interface RectElement extends BaseElement {
+  type: "rect";
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  color: string;
+  strokeWidth: number;
+}
+
+export type BoardElement = StrokeElement | TextElement | ImageElement | RectElement;

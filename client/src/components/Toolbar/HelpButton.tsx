@@ -6,6 +6,7 @@ const SHORTCUTS: { group: string; rows: { keys: string[]; label: string }[] }[] 
     rows: [
       { keys: ["P"],  label: "Pen tool" },
       { keys: ["T"],  label: "Text tool" },
+      { keys: ["R"],  label: "Rectangle tool" },
       { keys: ["[ ]"],  label: "Decrease/Increase size" },
     ],
   },
@@ -31,6 +32,15 @@ const SHORTCUTS: { group: string; rows: { keys: string[]; label: string }[] }[] 
     rows: [
       { keys: ["Enter"],               label: "Commit text" },
       { keys: ["Esc"],                 label: "Cancel text" },
+    ],
+  },
+  {
+    group: "Rectangle tool",
+    rows: [
+      { keys: ["Click"],  label: "Anchor top-left corner" },
+      { keys: ["Shift"],  label: "Lock to square" },
+      { keys: ["Click"],  label: "Confirm & broadcast" },
+      { keys: ["Esc"],    label: "Cancel" },
     ],
   },
   {

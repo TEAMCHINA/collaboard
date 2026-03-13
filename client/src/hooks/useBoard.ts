@@ -9,6 +9,7 @@ import { ToolManager } from "../tools/ToolManager";
 import { PenTool } from "../tools/PenTool";
 import { TextTool, type TextPlacement } from "../tools/TextTool";
 import { ImageTool } from "../tools/ImageTool";
+import { RectTool } from "../tools/RectTool";
 
 const SOFT_LIMIT = 1_000_000;
 const HARD_LIMIT = 5_000_000;
@@ -52,6 +53,9 @@ export function useBoard(token: string, displayName: string) {
 
     const pen = new PenTool(displayName, token, commitOp, emitDrawing);
     tm.register(pen);
+
+    const rect = new RectTool(displayName, token, commitOp, emitDrawing);
+    tm.register(rect);
 
     const text = new TextTool((x: number, y: number) => {
       // If there's an active text input, let blur handle commit — don't overwrite

@@ -4,6 +4,7 @@ import { getRenderer } from "./element-renderers";
 import "./element-renderers/stroke-renderer";
 import "./element-renderers/text-renderer";
 import "./element-renderers/image-renderer";
+import "./element-renderers/rect-renderer";
 
 export interface Viewport {
   panX: number;
