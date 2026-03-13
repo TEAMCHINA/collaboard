@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { generateToken } from "shared";
+import { PatchNotes } from "../components/PatchNotes/PatchNotes";
 
 export function LandingPage() {
   const navigate = useNavigate();
@@ -34,6 +35,7 @@ export function LandingPage() {
       >
         Generate new board
       </button>
+      <PatchNotes />
     </div>
   );
 }
