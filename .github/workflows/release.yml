@@ -18,14 +18,37 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0          # semantic-release needs full history to find previous tags
+          fetch-depth: 0
           persist-credentials: false
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Release
-        run: npx -y semantic-release
+      - name: Semantic Release
+        id: semantic
+        uses: cycjimmy/semantic-release-action@v4
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Summary
+        if: steps.semantic.outputs.new_release_published == 'true'
+        run: echo "## Released ${{ steps.semantic.outputs.new_release_git_tag }}" >> $GITHUB_STEP_SUMMARY
+
+      - uses: docker/setup-buildx-action@v3
+        if: steps.semantic.outputs.new_release_published == 'true'
+
+      - uses: docker/login-action@v3
+        if: steps.semantic.outputs.new_release_published == 'true'
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v5
+        if: steps.semantic.outputs.new_release_published == 'true'
+        with:
+          context: .
+          push: true
+          platforms: linux/amd64,linux/arm64
+          build-args: VITE_APP_VERSION=${{ steps.semantic.outputs.new_release_git_tag }}
+          tags: |
+            cchinn/collaboard:${{ steps.semantic.outputs.new_release_git_tag }}
+            cchinn/collaboard:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
