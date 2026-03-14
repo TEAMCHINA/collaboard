@@ -100,6 +100,15 @@ export function ReplaySlider() {
 
   const handleExit = () => useReplayStore.getState().exit();
 
+  useEffect(() => {
+    if (!active) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") handleExit();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [active]);
+
   const handlePlayPause = () => {
     const { index: cur, elements: els, setIndex, setPlaying } = useReplayStore.getState();
     if (cur >= els.length) { setIndex(0); setPlaying(true); }
