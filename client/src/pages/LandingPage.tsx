@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { theme } from "../styles/theme";
 import { generateToken } from "shared";
 import { PatchNotes } from "../components/PatchNotes/PatchNotes";
 
@@ -27,7 +28,7 @@ export function LandingPage() {
           fontSize: 18,
           borderRadius: 8,
           border: "none",
-          background: "#2563eb",
+          background: theme.accentBlue,
           color: "white",
           cursor: "pointer",
           fontWeight: 600,

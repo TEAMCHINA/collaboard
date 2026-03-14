@@ -3,8 +3,28 @@ import type { FC } from "react";
 import type { RectElement, AddElementOp, BoardElement } from "shared";
 import { generateId } from "shared";
 import type { ITool, PointerEventData, ToolOption } from "./Tool";
+import { theme } from "../styles/theme";
 
-const rectStore = create<ToolOption>(() => ({ size: 2, color: "#000000" }));
+interface RectToolOption extends ToolOption {
+  filled: boolean;
+}
+
+const rectStore = create<RectToolOption>(() => ({ size: 2, color: "#000000", filled: false }));
+
+const RectControls: FC = () => {
+  const filled = rectStore((s) => s.filled);
+  return (
+    <label style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, color: theme.textSecondary, cursor: "pointer", userSelect: "none" }}>
+      <input
+        type="checkbox"
+        checked={filled}
+        onChange={(e) => rectStore.setState({ filled: e.target.checked })}
+        style={{ cursor: "pointer" }}
+      />
+      Fill
+    </label>
+  );
+};
 
 const RectIcon: FC = () => (
   <svg
@@ -29,6 +49,7 @@ export class RectTool implements ITool {
   name = "rect";
   label = "Rect";
   icon = RectIcon;
+  controls = RectControls;
   keybinds = ["r", "R"];
   sizeConfig = { min: 1, max: 20 };
   hasColor = true;
@@ -163,13 +184,14 @@ export class RectTool implements ITool {
       height: h,
       color: rectStore.getState().color,
       strokeWidth: rectStore.getState().size,
+      filled: rectStore.getState().filled,
     };
     el._preview = true;
     return el;
   }
 
   private commit(x: number, y: number, w: number, h: number): void {
-    const { size: strokeWidth, color } = rectStore.getState();
+    const { size: strokeWidth, color, filled } = rectStore.getState();
     const element: RectElement = {
       id: generateId(),
       type: "rect",
@@ -182,6 +204,7 @@ export class RectTool implements ITool {
       height: h,
       color,
       strokeWidth,
+      filled,
     };
     const op: AddElementOp = {
       id: generateId(),

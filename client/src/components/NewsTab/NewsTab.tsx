@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useCommits } from "../../hooks/useCommits";
+import { theme } from "../../styles/theme";
 
 const SEE_ALL_URL = "https://github.com/teamchina/collaboard/commits/main";
 const TAB_LABEL = import.meta.env.VITE_APP_VERSION ?? "NEWS";
@@ -34,7 +35,7 @@ export function NewsTab() {
           background: "#fff",
           borderRadius: "8px 8px 0 0",
           boxShadow: "0 -4px 16px rgba(0,0,0,0.12)",
-          border: "1px solid #e5e7eb",
+          border: `1px solid ${theme.borderSubtle}`,
           borderBottom: "none",
           padding: 14,
           transform: open ? "translateY(0)" : "translateY(100%)",
@@ -44,7 +45,7 @@ export function NewsTab() {
         }}
         aria-hidden={!open}
       >
-        <div style={{ fontSize: 12, fontWeight: 600, color: "#111827", marginBottom: 10 }}>
+        <div style={{ fontSize: 12, fontWeight: 600, color: theme.textPrimary, marginBottom: 10 }}>
           What's new
         </div>
 
@@ -58,27 +59,27 @@ export function NewsTab() {
                 style={{
                   fontFamily: "monospace",
                   fontSize: 10,
-                  color: "#9ca3af",
+                  color: theme.textMuted,
                   textDecoration: "none",
                   flexShrink: 0,
                 }}
               >
                 {c.sha.slice(0, 7)}
               </a>
-              <span style={{ fontSize: 12, color: "#111827" }}>{c.message}</span>
+              <span style={{ fontSize: 12, color: theme.textPrimary }}>{c.message}</span>
             </div>
-            <div style={{ fontSize: 11, color: "#9ca3af", marginTop: 1, paddingLeft: 46 }}>
+            <div style={{ fontSize: 11, color: theme.textMuted, marginTop: 1, paddingLeft: 46 }}>
               {c.date}
             </div>
           </div>
         ))}
 
-        <div style={{ borderTop: "1px solid #e5e7eb", marginTop: 4, paddingTop: 8 }}>
+        <div style={{ borderTop: `1px solid ${theme.borderSubtle}`, marginTop: 4, paddingTop: 8 }}>
           <a
             href={SEE_ALL_URL}
             target="_blank"
             rel="noreferrer"
-            style={{ fontSize: 11, color: "#2563eb", textDecoration: "none" }}
+            style={{ fontSize: 11, color: theme.accentBlue, textDecoration: "none" }}
           >
             See all on GitHub →
           </a>
@@ -92,7 +93,7 @@ export function NewsTab() {
           display: "flex",
           alignItems: "center",
           gap: 6,
-          background: "#1f2937",
+          background: theme.overlayBg,
           color: "#fff",
           border: "none",
           borderRadius: "6px 6px 0 0",

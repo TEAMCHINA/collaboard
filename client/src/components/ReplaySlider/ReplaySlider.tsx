@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { theme } from "../../styles/theme";
 import type { BoardElement, StrokeElement, TextElement, ImageElement, RectElement } from "shared";
 import { useReplayStore } from "../../store/replay-store";
 import { useBoardStore } from "../../store/board-store";
@@ -157,7 +158,7 @@ export function ReplaySlider() {
           width: PLAY_BTN_SIZE,
           height: PLAY_BTN_SIZE,
           borderRadius: "50%",
-          background: "#1f2937",
+          background: theme.overlayBg,
           border: "none",
           color: "#e5e7eb",
           cursor: "pointer",
@@ -199,7 +200,7 @@ export function ReplaySlider() {
       >
         <div
           style={{
-            background: "#1d4ed8",
+            background: theme.replayActiveBg,
             color: "#fff",
             padding: "5px 20px",
             borderRadius: 20,
@@ -242,7 +243,7 @@ export function ReplaySlider() {
           bottom: CONTROLS_BOTTOM,
           height: PILL_HEIGHT,
           borderRadius: PILL_RADIUS,
-          background: "#1f2937",
+          background: theme.overlayBg,
           display: "flex",
           alignItems: "center",
           boxShadow: "0 4px 14px rgba(0,0,0,0.35)",
@@ -264,7 +265,7 @@ export function ReplaySlider() {
             borderRadius: "50%",
             background: "transparent",
             border: "none",
-            color: atStart ? "#4b5563" : "#9ca3af",
+            color: atStart ? "#4b5563" : theme.textMuted,
             cursor: atStart ? "default" : "pointer",
             display: "flex",
             alignItems: "center",
@@ -288,7 +289,7 @@ export function ReplaySlider() {
             width: PLAY_BTN_SIZE,
             height: PLAY_BTN_SIZE,
             borderRadius: "50%",
-            background: "#374151",
+            background: theme.overlayControlBg,
             border: "none",
             color: "#e5e7eb",
             cursor: "pointer",
@@ -332,7 +333,7 @@ export function ReplaySlider() {
         {/* Counter */}
         <span
           style={{
-            color: "#9ca3af",
+            color: theme.textMuted,
             fontSize: 11,
             minWidth: 52,
             textAlign: "center",

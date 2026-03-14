@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { theme } from "../../styles/theme";
 
 const SHORTCUTS: { group: string; rows: { keys: string[]; label: string }[] }[] = [
   {
@@ -62,13 +63,13 @@ function Kbd({ children }: { children: string }) {
       display: "inline-block",
       padding: "1px 5px",
       background: "#f3f4f6",
-      border: "1px solid #d1d5db",
+      border: `1px solid ${theme.borderControl}`,
       borderBottomWidth: 2,
       borderRadius: 4,
       fontSize: 11,
       fontFamily: "system-ui, sans-serif",
       fontWeight: 500,
-      color: "#374151",
+      color: theme.textSecondary,
       lineHeight: 1.5,
       whiteSpace: "nowrap",
     }}>
@@ -91,7 +92,7 @@ export function HelpButton() {
         width: 22,
         height: 22,
         borderRadius: "50%",
-        border: "1.5px solid #9ca3af",
+        border: `1.5px solid ${theme.textMuted}`,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -113,7 +114,7 @@ export function HelpButton() {
           right: 0,
           width: 260,
           background: "#fff",
-          border: "1px solid #e5e7eb",
+          border: `1px solid ${theme.borderSubtle}`,
           borderRadius: 8,
           boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
           padding: "12px 14px",
@@ -127,13 +128,13 @@ export function HelpButton() {
             width: 10,
             height: 10,
             background: "#fff",
-            border: "1px solid #e5e7eb",
+            border: `1px solid ${theme.borderSubtle}`,
             borderBottom: "none",
             borderRight: "none",
             transform: "rotate(45deg)",
           }} />
 
-          <div style={{ fontSize: 12, fontWeight: 700, color: "#111827", marginBottom: 10 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: theme.textPrimary, marginBottom: 10 }}>
             Keyboard shortcuts
           </div>
 
@@ -144,7 +145,7 @@ export function HelpButton() {
                 fontWeight: 600,
                 textTransform: "uppercase",
                 letterSpacing: "0.05em",
-                color: "#9ca3af",
+                color: theme.textMuted,
                 marginBottom: 5,
               }}>
                 {group.group}
@@ -160,7 +161,7 @@ export function HelpButton() {
                     <div style={{ display: "flex", alignItems: "center", gap: 3, flexShrink: 0 }}>
                       {row.keys.map((k, i) => (
                         <span key={k} style={{ display: "flex", alignItems: "center", gap: 3 }}>
-                          {i > 0 && <span style={{ color: "#9ca3af", fontSize: 10 }}>+</span>}
+                          {i > 0 && <span style={{ color: theme.textMuted, fontSize: 10 }}>+</span>}
                           <Kbd>{k}</Kbd>
                         </span>
                       ))}

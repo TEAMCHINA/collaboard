@@ -1,4 +1,5 @@
 import { useSaveStore, type SaveDisplay } from "../../store/save-store";
+import { theme } from "../../styles/theme";
 
 export function SaveIndicator() {
   const display = useSaveStore((s) => s.display);
@@ -8,8 +9,8 @@ export function SaveIndicator() {
 
   const styles: Record<Exclude<SaveDisplay, "idle">, { bg: string; color: string; text: string }> = {
     saving: { bg: "#f0f0f0", color: "#555", text: "Saving..." },
-    saved: { bg: "#ecfdf5", color: "#16a34a", text: "Saved" },
-    error: { bg: "#fef2f2", color: "#dc2626", text: `Save error: ${errorMessage || "unknown"}` },
+    saved: { bg: "#ecfdf5", color: theme.statusOnline, text: "Saved" },
+    error: { bg: "#fef2f2", color: theme.statusOffline, text: `Save error: ${errorMessage || "unknown"}` },
   };
 
   const { bg, color, text } = styles[display];

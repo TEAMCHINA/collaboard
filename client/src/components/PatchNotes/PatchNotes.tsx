@@ -1,4 +1,5 @@
 import { useCommits } from "../../hooks/useCommits";
+import { theme } from "../../styles/theme";
 
 const SEE_ALL_URL = "https://github.com/teamchina/collaboard/commits/main";
 
@@ -9,7 +10,7 @@ export function PatchNotes() {
 
   return (
     <div style={{ width: 340, textAlign: "left" }}>
-      <div style={{ fontSize: 13, fontWeight: 600, color: "#111827", marginBottom: 10 }}>
+      <div style={{ fontSize: 13, fontWeight: 600, color: theme.textPrimary, marginBottom: 10 }}>
         What's new
       </div>
 
@@ -23,27 +24,27 @@ export function PatchNotes() {
               style={{
                 fontFamily: "monospace",
                 fontSize: 11,
-                color: "#6b7280",
+                color: theme.textMuted,
                 textDecoration: "none",
                 flexShrink: 0,
               }}
             >
               {c.sha.slice(0, 7)}
             </a>
-            <span style={{ fontSize: 13, color: "#111827" }}>{c.message}</span>
+            <span style={{ fontSize: 13, color: theme.textPrimary }}>{c.message}</span>
           </div>
-          <div style={{ fontSize: 11, color: "#9ca3af", marginTop: 2, paddingLeft: 52 }}>
+          <div style={{ fontSize: 11, color: theme.textMuted, marginTop: 2, paddingLeft: 52 }}>
             {c.date}
           </div>
         </div>
       ))}
 
-      <div style={{ borderTop: "1px solid #e5e7eb", marginTop: 4, paddingTop: 8 }}>
+      <div style={{ borderTop: `1px solid ${theme.borderSubtle}`, marginTop: 4, paddingTop: 8 }}>
         <a
           href={SEE_ALL_URL}
           target="_blank"
           rel="noreferrer"
-          style={{ fontSize: 12, color: "#2563eb", textDecoration: "none" }}
+          style={{ fontSize: 12, color: theme.accentBlue, textDecoration: "none" }}
         >
           See all on GitHub →
         </a>

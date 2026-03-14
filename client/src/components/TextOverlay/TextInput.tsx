@@ -15,7 +15,7 @@ export function TextInput({ x, y, onCommit, onCancel, onChange }: Props) {
   const [value, setValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const doneRef = useRef(false);
-  const { size: fontSize, color: textColor } = useTextOptions();
+  const { size: fontSize, color: textColor, bold, italic, underline } = useTextOptions();
   const fontFamily = useToolStore((s) => s.fontFamily);
   const scale = useViewportStore((s) => s.scale);
 
@@ -66,6 +66,9 @@ export function TextInput({ x, y, onCommit, onCancel, onChange }: Props) {
         top: y,
         fontSize: fontSize * scale,
         fontFamily,
+        fontWeight: bold ? "bold" : "normal",
+        fontStyle: italic ? "italic" : "normal",
+        textDecoration: underline ? "underline" : "none",
         color: textColor,
         background: "transparent",
         border: "1px dashed #2563eb",

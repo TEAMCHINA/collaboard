@@ -21,6 +21,9 @@ export interface TextElement extends BaseElement {
   fontSize: number;
   fontFamily: string;
   color: string;
+  bold?: boolean;
+  italic?: boolean;
+  underline?: boolean;
 }
 
 export interface ImageElement extends BaseElement {
@@ -40,6 +43,7 @@ export interface RectElement extends BaseElement {
   height: number;
   color: string;
   strokeWidth: number;
+  filled?: boolean;
 }
 
 export type BoardElement = StrokeElement | TextElement | ImageElement | RectElement;

@@ -16,6 +16,7 @@ export interface ITool {
   name: string;
   label: string;
   icon: FC;
+  controls?: FC;
   keybinds: string[];
   sizeConfig: { min: number; max: number } | null;
   hasColor: boolean;

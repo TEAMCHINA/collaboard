@@ -17,6 +17,9 @@ function renderRect(ctx: CanvasRenderingContext2D, element: RectElement): void {
     const s = 8;
     ctx.fillStyle = "#2563eb";
     ctx.fillRect(x + width - s / 2, y + height - s / 2, s, s);
+  } else if (element.filled) {
+    ctx.fillStyle = color;
+    ctx.fillRect(x, y, width, height);
   } else {
     ctx.strokeStyle = color;
     ctx.lineWidth = strokeWidth;

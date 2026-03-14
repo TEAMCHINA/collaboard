@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback, useSyncExternalStore } from "react";
+import { theme } from "../../styles/theme";
 import { useToolStore } from "../../store/tool-store";
 import { useConnectionStore } from "../../store/connection-store";
 import { useViewportStore } from "../../store/viewport-store";
@@ -20,7 +21,7 @@ const recentSwatchStyle = (color: string, active: boolean): React.CSSProperties 
   borderRadius: "50%",
   background: color,
   border: "none",
-  outline: active ? "2px solid #374151" : "1px solid #d1d5db",
+  outline: active ? `2px solid ${theme.textSecondary}` : `1px solid ${theme.borderControl}`,
   outlineOffset: "1px",
   cursor: "pointer",
   padding: 0,
@@ -33,7 +34,7 @@ const recentPanelStyle: React.CSSProperties = {
   left: "50%",
   transform: "translateX(-50%)",
   background: "#fff",
-  border: "1px solid #e5e7eb",
+  border: `1px solid ${theme.borderSubtle}`,
   borderRadius: 6,
   padding: "5px 6px",
   display: "flex",
@@ -96,8 +97,8 @@ export function Toolbar({ toolManager, onClear, onDownload, displayName, onNameC
       alignItems: "center",
       gap: 12,
       padding: "8px 16px",
-      background: "#f9fafb",
-      borderBottom: "1px solid #e5e7eb",
+      background: theme.toolbarBg,
+      borderBottom: `1px solid ${theme.borderSubtle}`,
       flexShrink: 0,
     }}>
       {toolManager.getTools().filter(t => !t.hidden).map(tool => (
@@ -113,7 +114,7 @@ export function Toolbar({ toolManager, onClear, onDownload, displayName, onNameC
 
       {activeTool?.hasColor && (
         <>
-          <div style={{ width: 1, height: 24, background: "#d1d5db" }} />
+          <div style={{ width: 1, height: 24, background: theme.borderControl }} />
           <div style={{ position: "relative" }}>
             <input
               ref={colorInputRef}
@@ -154,7 +155,9 @@ export function Toolbar({ toolManager, onClear, onDownload, displayName, onNameC
         </>
       )}
 
-      <div style={{ width: 1, height: 24, background: "#d1d5db" }} />
+      {activeTool?.controls && <activeTool.controls />}
+
+      <div style={{ width: 1, height: 24, background: theme.borderControl }} />
       <button
         onClick={onClear}
         title="Clear all elements"
@@ -162,10 +165,10 @@ export function Toolbar({ toolManager, onClear, onDownload, displayName, onNameC
           padding: "4px 10px",
           fontSize: 13,
           background: "transparent",
-          border: "1px solid #d1d5db",
+          border: `1px solid ${theme.borderControl}`,
           borderRadius: 4,
           cursor: "pointer",
-          color: "#dc2626",
+          color: theme.statusOffline,
         }}
       >
         Clear
@@ -174,7 +177,7 @@ export function Toolbar({ toolManager, onClear, onDownload, displayName, onNameC
       <div style={{ flex: 1 }} />
 
       {/* Zoom controls */}
-      <span style={{ fontSize: 12, color: "#374151", minWidth: 40, textAlign: "right" }}>
+      <span style={{ fontSize: 12, color: theme.textSecondary, minWidth: 40, textAlign: "right" }}>
         {Math.round(scale * 100)}%
       </span>
       <button
@@ -184,10 +187,10 @@ export function Toolbar({ toolManager, onClear, onDownload, displayName, onNameC
           padding: "4px 8px",
           fontSize: 12,
           background: "transparent",
-          border: "1px solid #d1d5db",
+          border: `1px solid ${theme.borderControl}`,
           borderRadius: 4,
           cursor: "pointer",
-          color: "#374151",
+          color: theme.textSecondary,
         }}
       >
         Reset View
@@ -199,10 +202,10 @@ export function Toolbar({ toolManager, onClear, onDownload, displayName, onNameC
           padding: "4px 8px",
           fontSize: 12,
           background: "transparent",
-          border: "1px solid #d1d5db",
+          border: `1px solid ${theme.borderControl}`,
           borderRadius: 4,
           cursor: "pointer",
-          color: "#374151",
+          color: theme.textSecondary,
           display: "flex",
           alignItems: "center",
           gap: 4,
@@ -214,7 +217,7 @@ export function Toolbar({ toolManager, onClear, onDownload, displayName, onNameC
           <path d="M3 13h10" />
         </svg>
       </button>
-      <div style={{ width: 1, height: 24, background: "#d1d5db" }} />
+      <div style={{ width: 1, height: 24, background: theme.borderControl }} />
 
       {editing ? (
         <input
@@ -229,7 +232,7 @@ export function Toolbar({ toolManager, onClear, onDownload, displayName, onNameC
           style={{
             fontSize: 13,
             padding: "2px 6px",
-            border: "1px solid #d1d5db",
+            border: `1px solid ${theme.borderControl}`,
             borderRadius: 4,
             outline: "none",
             width: 120,
@@ -240,7 +243,7 @@ export function Toolbar({ toolManager, onClear, onDownload, displayName, onNameC
           onClick={() => { setDraft(displayName); setEditing(true); }}
           style={{
             fontSize: 13,
-            color: "#374151",
+            color: theme.textSecondary,
             cursor: "pointer",
             padding: "2px 6px",
             borderRadius: 4,
@@ -252,16 +255,16 @@ export function Toolbar({ toolManager, onClear, onDownload, displayName, onNameC
         </span>
       )}
 
-      <div style={{ width: 1, height: 24, background: "#d1d5db" }} />
+      <div style={{ width: 1, height: 24, background: theme.borderControl }} />
 
       <HelpButton />
 
-      <div style={{ width: 1, height: 24, background: "#d1d5db" }} />
+      <div style={{ width: 1, height: 24, background: theme.borderControl }} />
 
       <span
         style={{
           fontSize: 12,
-          color: connected ? "#16a34a" : "#dc2626",
+          color: connected ? theme.statusOnline : theme.statusOffline,
           display: "flex",
           alignItems: "center",
           gap: 4,
@@ -273,7 +276,7 @@ export function Toolbar({ toolManager, onClear, onDownload, displayName, onNameC
           width: 8,
           height: 8,
           borderRadius: "50%",
-          background: connected ? "#16a34a" : "#dc2626",
+          background: connected ? theme.statusOnline : theme.statusOffline,
           display: "inline-block",
         }} />
         {connected ? `${users.length} online` : "Offline"}

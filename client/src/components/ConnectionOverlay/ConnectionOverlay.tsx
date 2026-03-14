@@ -1,4 +1,5 @@
 import { useConnectionStore } from "../../store/connection-store";
+import { theme } from "../../styles/theme";
 
 export function ConnectionOverlay() {
   const connected = useConnectionStore((s) => s.connected);
@@ -27,7 +28,7 @@ export function ConnectionOverlay() {
         boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
         textAlign: "center",
       }}>
-        <div style={{ fontSize: 16, fontWeight: 600, color: "#374151", marginBottom: 6 }}>
+        <div style={{ fontSize: 16, fontWeight: 600, color: theme.textSecondary, marginBottom: 6 }}>
           Disconnected
         </div>
         <div style={{ fontSize: 13, color: "#6b7280" }}>

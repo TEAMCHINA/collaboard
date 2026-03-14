@@ -144,6 +144,7 @@ export function useBoard(token: string, displayName: string) {
     if (!content.trim()) return;
 
     const { size: fontSize, color: textColor } = textTool.getOptions();
+    const { bold, italic, underline } = textTool.getStyle();
     const { fontFamily } = useToolStore.getState();
     const element: TextElement = {
       id: placement.id,
@@ -157,6 +158,9 @@ export function useBoard(token: string, displayName: string) {
       fontSize,
       fontFamily,
       color: textColor,
+      bold,
+      italic,
+      underline,
     };
 
     const op: AddElementOp = {
@@ -183,6 +187,7 @@ export function useBoard(token: string, displayName: string) {
     if (!placement) return;
 
     const { size: fontSize, color: textColor } = textTool.getOptions();
+    const { bold, italic, underline } = textTool.getStyle();
     const { fontFamily } = useToolStore.getState();
     const element: TextElement = {
       id: placement.id,
@@ -196,6 +201,9 @@ export function useBoard(token: string, displayName: string) {
       fontSize,
       fontFamily,
       color: textColor,
+      bold,
+      italic,
+      underline,
     };
     socket.emit("board:drawing", element);
   }, [displayName, textTool]);

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { theme } from "../../styles/theme";
 
 interface Props {
   onSubmit: (name: string) => void;
@@ -59,7 +60,7 @@ export function UserNamePrompt({ onSubmit }: Props) {
             fontSize: 16,
             borderRadius: 6,
             border: "none",
-            background: name.trim() ? "#2563eb" : "#ccc",
+            background: name.trim() ? theme.accentBlue : "#ccc",
             color: "white",
             cursor: name.trim() ? "pointer" : "default",
             fontWeight: 600,
