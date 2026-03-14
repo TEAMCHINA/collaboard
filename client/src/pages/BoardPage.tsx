@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from "react";
+
+let lastCursorEmit = 0;
 import { useParams } from "react-router-dom";
 import { useUserStore } from "../store/user-store";
 import { useSocketConnection } from "../socket/socket-hooks";
@@ -13,6 +15,7 @@ import { TextInput } from "../components/TextOverlay/TextInput";
 import { SaveIndicator } from "../components/SaveIndicator/SaveIndicator";
 import { ConnectionOverlay } from "../components/ConnectionOverlay/ConnectionOverlay";
 import { NewsTab } from "../components/NewsTab/NewsTab";
+import { ReplaySlider } from "../components/ReplaySlider/ReplaySlider";
 
 export function BoardPage() {
   const { token } = useParams<{ token: string }>();
@@ -43,7 +46,6 @@ export function BoardPage() {
 }
 
 function BoardPageInner({ token, displayName, onNameChange }: { token: string; displayName: string; onNameChange: (name: string) => void }) {
-  const lastCursorEmit = useRef(0);
   const canvasRef = useRef<CanvasHandle>(null);
 
   useSocketConnection(token, displayName);
@@ -52,8 +54,8 @@ function BoardPageInner({ token, displayName, onNameChange }: { token: string; d
   // Emit cursor position in world coords (throttled)
   const handleMouseMove = (e: React.MouseEvent) => {
     const now = Date.now();
-    if (now - lastCursorEmit.current > 50) {
-      lastCursorEmit.current = now;
+    if (now - lastCursorEmit > 50) {
+      lastCursorEmit = now;
       const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
       const { panX, panY, scale } = useViewportStore.getState();
       socket.emit("cursor:move", {
@@ -73,6 +75,7 @@ function BoardPageInner({ token, displayName, onNameChange }: { token: string; d
         onNameChange={onNameChange}
       />
       <div
+        id="canvas-container"
         style={{ flex: 1, position: "relative", overflow: "hidden" }}
         onMouseMove={handleMouseMove}
       >
@@ -91,6 +94,7 @@ function BoardPageInner({ token, displayName, onNameChange }: { token: string; d
       <SaveIndicator />
       <ConnectionOverlay />
       <NewsTab />
+      <ReplaySlider />
     </div>
   );
 }

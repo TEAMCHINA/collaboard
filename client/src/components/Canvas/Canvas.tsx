@@ -2,6 +2,7 @@ import { useRef, useEffect, useCallback, forwardRef, useImperativeHandle } from 
 import { useBoardStore } from "../../store/board-store";
 import { useDrawingStore } from "../../store/drawing-store";
 import { useViewportStore } from "../../store/viewport-store";
+import { useReplayStore } from "../../store/replay-store";
 import { CanvasRenderer } from "../../renderer/CanvasRenderer";
 import { useCanvasSize } from "../../hooks/useCanvasSize";
 import type { ToolManager } from "../../tools/ToolManager";
@@ -75,7 +76,10 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ toolMana
       if (!running || !rendererRef.current) return;
 
       const vp = useViewportStore.getState();
-      const elements = useBoardStore.getState().getElementsSorted();
+      const replay = useReplayStore.getState();
+      const elements = replay.active
+        ? replay.elements.slice(0, replay.index)
+        : useBoardStore.getState().getElementsSorted();
       rendererRef.current.render(elements, vp);
 
       const localActive = toolManager.getActiveElement();
@@ -179,6 +183,9 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ toolMana
 
     // Two-finger gesture already active — don't pass to tool
     if (activePointers.current.size >= 2) return;
+
+    // Disable drawing during replay
+    if (useReplayStore.getState().active) return;
 
     const point = getCanvasPoint(e);
     toolManager.onPointerDown({ ...point, pressure: e.pressure });
