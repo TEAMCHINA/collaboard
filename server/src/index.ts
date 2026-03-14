@@ -3,6 +3,7 @@ import { app } from "./app.js";
 import { setupSocketServer } from "./socket/index.js";
 import { initSqlite } from "./persistence/sqlite-client.js";
 import { startSnapshotManager, stopSnapshotManager, snapshotAll } from "./persistence/snapshot-manager.js";
+import { startCommitPoller } from "./commits.js";
 
 const PORT = parseInt(process.env.PORT || "3001", 10);
 
@@ -17,6 +18,7 @@ async function start() {
   });
 
   startSnapshotManager(io);
+  startCommitPoller(io);
 }
 
 // Graceful shutdown: stop accepting connections, snapshot, then exit

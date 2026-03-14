@@ -1,5 +1,7 @@
 import { useEffect } from "react";
 import { create } from "zustand";
+import { TAG_MAP } from "shared";
+import { socket } from "../socket/socket-client";
 
 export interface Commit {
   sha: string;
@@ -17,30 +19,7 @@ interface CommitStore {
   setHasNew: (v: boolean) => void;
 }
 
-const CACHE_KEY = "collaboard_commits";
 const SEEN_KEY = "collaboard_seen_sha";
-const CACHE_TTL = 3_600_000; // 1 hour
-const API_URL = "https://api.github.com/repos/teamchina/collaboard/commits?per_page=5";
-
-const TAG_MAP: Record<string, string> = {
-  feat: "New feature",
-  feature: "New feature",
-  fix: "Bug fix",
-  bugfix: "Bug fix",
-  hotfix: "Bug fix",
-  docs: "Documentation",
-  doc: "Documentation",
-  style: "Style",
-  refactor: "Refactor",
-  perf: "Performance improvement",
-  test: "Tests",
-  tests: "Tests",
-  chore: "Chore",
-  ci: "CI",
-  build: "Build",
-  revert: "Revert",
-  wip: "Work in progress",
-};
 
 function parseMessage(raw: string): string {
   const first = raw.split("\n")[0].trim();
@@ -60,27 +39,6 @@ function relativeDate(iso: string): string {
   return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
-interface CacheEntry {
-  commits: Commit[];
-  fetchedAt: number;
-  latestSha: string;
-}
-
-function loadCache(): CacheEntry | null {
-  try {
-    const raw = localStorage.getItem(CACHE_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
-}
-
-function saveCache(entry: CacheEntry): void {
-  try {
-    localStorage.setItem(CACHE_KEY, JSON.stringify(entry));
-  } catch {}
-}
-
 function loadSeenSha(): string {
   return localStorage.getItem(SEEN_KEY) ?? "";
 }
@@ -97,34 +55,16 @@ const useCommitStore = create<CommitStore>((set) => ({
 // Module-level flag — prevents double-fetch when multiple components call useCommits()
 let fetchInitiated = false;
 
-async function fetchAndUpdate(): Promise<void> {
-  const store = useCommitStore.getState();
-  const cache = loadCache();
-  try {
-    const res = await fetch(API_URL);
-    if (!res.ok) return;
-    const data = await res.json();
-    const latestSha: string = data[0]?.sha ?? "";
-
-    if (cache && latestSha === cache.latestSha) {
-      // No new commits — just bump the TTL
-      saveCache({ ...cache, fetchedAt: Date.now() });
-      return;
-    }
-
-    const commits: Commit[] = data.map((item: any) => ({
-      sha: item.sha as string,
-      message: parseMessage(item.commit.message as string),
-      date: relativeDate(item.commit.author.date as string),
-      url: item.html_url as string,
-    }));
-
-    saveCache({ commits, fetchedAt: Date.now(), latestSha });
-    store.setCommits(commits);
-    store.setHasNew(latestSha !== loadSeenSha());
-  } catch {
-    // silent fail — keep whatever is in the store already
-  }
+async function fetchFromServer(): Promise<void> {
+  const res = await fetch("/api/commits");
+  const raw = await res.json();
+  const commits: Commit[] = (raw as any[]).map((item) => ({
+    sha: item.sha,
+    message: parseMessage(item.message),
+    date: relativeDate(item.date),
+    url: item.url,
+  }));
+  useCommitStore.getState().setCommits(commits);
 }
 
 export function useCommits() {
@@ -137,28 +77,29 @@ export function useCommits() {
     fetchInitiated = true;
 
     const store = useCommitStore.getState();
-    const cache = loadCache();
+    store.setLoading(true);
+    fetchFromServer()
+      .then(() => {
+        const sha = useCommitStore.getState().commits[0]?.sha;
+        store.setHasNew(!!sha && sha !== loadSeenSha());
+      })
+      .finally(() => store.setLoading(false));
 
-    if (cache) {
-      store.setCommits(cache.commits);
-      store.setHasNew(cache.latestSha !== loadSeenSha());
-    } else {
-      store.setLoading(true);
-    }
-
-    const shouldFetch = !cache || Date.now() - cache.fetchedAt > CACHE_TTL;
-    if (shouldFetch) {
-      fetchAndUpdate().finally(() => store.setLoading(false));
-    }
-
-    const interval = setInterval(fetchAndUpdate, CACHE_TTL);
-    return () => clearInterval(interval);
+    const handler = () => {
+      fetchFromServer().then(() => useCommitStore.getState().setHasNew(true));
+    };
+    socket.on("commits:updated", handler);
+    return () => {
+      socket.off("commits:updated", handler);
+    };
   }, []);
 
   const markSeen = () => {
     const sha = useCommitStore.getState().commits[0]?.sha;
     if (sha) {
-      try { localStorage.setItem(SEEN_KEY, sha); } catch {}
+      try {
+        localStorage.setItem(SEEN_KEY, sha);
+      } catch {}
       useCommitStore.getState().setHasNew(false);
     }
   };

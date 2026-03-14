@@ -6,3 +6,4 @@ export type { ClientToServerEvents, ServerToClientEvents } from "./types/events.
 
 export { generateId, generateToken } from "./utils/id.js";
 export { invertOperation, applyOperation, reconstructState } from "./utils/operation-helpers.js";
+export { TAG_MAP, hasKnownTag, shouldIncludeCommit } from "./types/commits.js";

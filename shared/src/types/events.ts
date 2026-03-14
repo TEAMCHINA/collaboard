@@ -26,4 +26,5 @@ export interface ServerToClientEvents {
   "board:save-end": () => void;
   "board:save-error": (message: string) => void;
   "board:error": (message: string) => void;
+  "commits:updated": () => void;
 }
