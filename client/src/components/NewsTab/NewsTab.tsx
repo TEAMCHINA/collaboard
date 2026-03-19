@@ -49,7 +49,7 @@ export function NewsTab() {
           What's new
         </div>
 
-        {commits.slice(0, 3).map((c) => (
+        {commits.filter(c => c.message.startsWith("New feature")).slice(0, 5).map((c) => (
           <div key={c.sha} style={{ marginBottom: 10 }}>
             <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
               <a

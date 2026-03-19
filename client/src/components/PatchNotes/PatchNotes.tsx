@@ -14,7 +14,7 @@ export function PatchNotes() {
         What's new
       </div>
 
-      {commits.slice(0, 5).map((c) => (
+      {commits.slice(0, 7).map((c) => (
         <div key={c.sha} style={{ marginBottom: 10 }}>
           <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
             <a

@@ -2,7 +2,6 @@ import type { TypedServer } from "./socket/index.js";
 import { shouldIncludeCommit } from "shared";
 
 const POLL_INTERVAL = 5 * 60 * 1000;
-const DISPLAY_COUNT = 5;
 const GITHUB_URL =
   "https://api.github.com/repos/teamchina/collaboard/commits?per_page=20";
 
@@ -33,8 +32,7 @@ async function fetchCommits(io: TypedServer): Promise<void> {
     const data = await res.json();
 
     const filtered = (data as any[])
-      .filter((item) => shouldIncludeCommit(item.commit.message))
-      .slice(0, DISPLAY_COUNT);
+      .filter((item) => shouldIncludeCommit(item.commit.message));
 
     const newSha: string = filtered[0]?.sha ?? "";
     if (newSha === latestSha) {
