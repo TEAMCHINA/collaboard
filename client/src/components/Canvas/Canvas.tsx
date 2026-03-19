@@ -47,6 +47,16 @@ export const Canvas = forwardRef<CanvasHandle, Props>(function Canvas({ toolMana
     }
   }, [size]);
 
+  // Center viewport on world origin (0,0) on first mount
+  useEffect(() => {
+    const canvas = bgCanvasRef.current;
+    if (!canvas) return;
+    useViewportStore.setState({
+      panX: canvas.clientWidth / 2,
+      panY: canvas.clientHeight / 2,
+    });
+  }, []);
+
   useImperativeHandle(ref, () => ({
     downloadAsJpg() {
       const bg = bgCanvasRef.current;
