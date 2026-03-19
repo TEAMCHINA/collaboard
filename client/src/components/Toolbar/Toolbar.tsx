@@ -181,7 +181,7 @@ export function Toolbar({ toolManager, onClear, onDownload, displayName, onNameC
         {Math.round(scale * 100)}%
       </span>
       <button
-        onClick={() => useViewportStore.getState().reset()}
+        onClick={(e) => { useViewportStore.getState().reset(); (e.currentTarget as HTMLElement).blur(); }}
         title="Reset view (100%, centered)"
         style={{
           padding: "4px 8px",

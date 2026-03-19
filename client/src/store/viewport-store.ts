@@ -14,8 +14,8 @@ interface ViewportState {
 }
 
 export const useViewportStore = create<ViewportState>((set) => ({
-  panX: 0,
-  panY: 0,
+  panX: window.innerWidth / 2,
+  panY: window.innerHeight / 2,
   scale: 1,
 
   pan: (dx, dy) => set((s) => ({ panX: s.panX + dx, panY: s.panY + dy })),
@@ -28,5 +28,5 @@ export const useViewportStore = create<ViewportState>((set) => ({
       return { scale: newScale, panX, panY };
     }),
 
-  reset: () => set({ panX: 0, panY: 0, scale: 1 }),
+  reset: () => set({ panX: window.innerWidth / 2, panY: window.innerHeight / 2, scale: 1 }),
 }));
