@@ -11,7 +11,7 @@ export function PatchNotes() {
   return (
     <div style={{ width: 340, textAlign: "left" }}>
       <div style={{ fontSize: 13, fontWeight: 600, color: theme.textPrimary, marginBottom: 10 }}>
-        What's new
+        What's new{import.meta.env.VITE_APP_VERSION ? ` (${import.meta.env.VITE_APP_VERSION})` : ""}
       </div>
 
       {commits.slice(0, 7).map((c) => (

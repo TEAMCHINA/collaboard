@@ -3,7 +3,8 @@ import { useCommits } from "../../hooks/useCommits";
 import { theme } from "../../styles/theme";
 
 const SEE_ALL_URL = "https://github.com/teamchina/collaboard/commits/main";
-const TAB_LABEL = import.meta.env.VITE_APP_VERSION ?? "NEWS";
+const APP_VERSION: string | undefined = import.meta.env.VITE_APP_VERSION;
+const TAB_LABEL = APP_VERSION ? `News (${APP_VERSION})` : "News";
 
 export function NewsTab() {
   const { commits, hasNew, markSeen } = useCommits();

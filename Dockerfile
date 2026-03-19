@@ -38,6 +38,8 @@ COPY --from=base /app/shared/dist shared/dist
 COPY --from=base /app/server/dist server/dist
 COPY --from=base /app/client/dist client/dist
 
+ARG VITE_APP_VERSION=dev
+ENV APP_VERSION=$VITE_APP_VERSION
 ENV NODE_ENV=production
 ENV PORT=3001
 EXPOSE 3001
