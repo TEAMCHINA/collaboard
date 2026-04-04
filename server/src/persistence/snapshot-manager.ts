@@ -23,7 +23,7 @@ export function stopSnapshotManager(): void {
   }
 }
 
-export function snapshotAll(): void {
+export async function snapshotAll(): Promise<void> {
   const tokens = getActiveBoards();
   if (tokens.length === 0) return;
 
@@ -50,7 +50,7 @@ export function snapshotAll(): void {
       board.dirty = false;
     }
 
-    persistToFile();
+    await persistToFile();
 
     if (io) {
       for (const token of dirtyTokens) {
@@ -71,7 +71,7 @@ export function snapshotAll(): void {
   }
 }
 
-export function snapshotBoard(token: string): void {
+export async function snapshotBoard(token: string): Promise<void> {
   const board = getBoard(token);
   if (!board) return;
 
@@ -79,7 +79,7 @@ export function snapshotBoard(token: string): void {
     const elements = getBoardElements(token);
     saveSnapshot(token, elements, board.seqNum);
     board.dirty = false;
-    persistToFile();
+    await persistToFile();
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown snapshot error";
     console.error(`Snapshot error for board ${token}: ${message}`);

@@ -36,12 +36,12 @@ export function getDb(): Database {
   return db;
 }
 
-export function persistToFile(): void {
+export async function persistToFile(): Promise<void> {
   if (!db) return;
   const data = db.export();
   const buffer = Buffer.from(data);
   // Write to temp file then rename for atomicity
   const tmpPath = DB_PATH + ".tmp";
-  fs.writeFileSync(tmpPath, buffer);
-  fs.renameSync(tmpPath, DB_PATH);
+  await fs.promises.writeFile(tmpPath, buffer);
+  await fs.promises.rename(tmpPath, DB_PATH);
 }
