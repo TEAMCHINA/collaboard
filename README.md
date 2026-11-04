@@ -76,6 +76,8 @@ docker compose up -d
 
 The server holds board state in memory and periodically snapshots dirty boards to SQLite. When all users leave a board, it's immediately saved and evicted from memory. On the next join, state is restored from the snapshot.
 
-Operations flow through the server — clients emit ops, the server applies them, stamps a sequence number, and broadcasts to all room members. Undo/redo is server-authoritative and scoped per user.
+Collaboard uses an event-driven architecture built around Socket.IO. Clients emit operations (drawing strokes, text changes, cursor movements, etc.) to the server, which maintains the authoritative board state, applies operations, assigns sequence numbers, and broadcasts updates to connected clients. This keeps clients synchronized without requiring them to independently reconcile board state.
+
+Undo/redo is also server-authoritative and scoped per user, allowing users to reverse their own actions without affecting other participants' history.
 
 The renderer uses dual HTML canvases: a background canvas for committed elements and an active canvas for in-progress drawing, both using Canvas 2D. The tool and renderer systems are registered in a Map for extensibility - adding new tools is just a matter of registering a render function.
