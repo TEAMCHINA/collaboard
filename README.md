@@ -74,10 +74,20 @@ docker compose up -d
 
 ## Architecture
 
-The server holds board state in memory and periodically snapshots dirty boards to SQLite. When all users leave a board, it's immediately saved and evicted from memory. On the next join, state is restored from the snapshot.
+Collaboard uses an event-driven architecture built around Socket.IO. Clients emit operations to the server, which maintains an authoritative, ordered log of committed operations and broadcasts updates to connected clients. This event log represents the board's state and supports rendering, replay, and per-user undo/redo.
 
-Collaboard uses an event-driven architecture built around Socket.IO. Clients emit operations (drawing strokes, text changes, cursor movements, etc.) to the server, which maintains the authoritative board state, applies operations, assigns sequence numbers, and broadcasts updates to connected clients. This keeps clients synchronized without requiring them to independently reconcile board state.
+Active boards are maintained in memory, with their event logs periodically persisted to SQLite. When the last user leaves a board, its event log is saved and evicted from memory. When someone rejoins, the board is restored from the persisted log.
 
 Undo/redo is also server-authoritative and scoped per user, allowing users to reverse their own actions without affecting other participants' history.
 
 The renderer uses dual HTML canvases: a background canvas for committed elements and an active canvas for in-progress drawing, both using Canvas 2D. The tool and renderer systems are registered in a Map for extensibility - adding new tools is just a matter of registering a render function.
+
+## Design Decisions and Tradeoffs
+
+### Event log persistence
+
+Rather than persisting every operation as it arrives, I chose to periodically snapshot the event log. This reduces database writes and keeps the persistence mechanism simple, at the cost of potentially losing recent operations if the server crashes before the next snapshot.
+
+Collaboard was primarily designed for casual collaboration, like playing Pictionary with friends or discussing raid strategies in World of Warcraft. Most sessions aren't expected to be revisited, so stronger durability guarantees weren't a priority. Persisting individual events as they arrive would be a reasonable extension if those requirements change.
+
+The event history is also mutable: undo removes the corresponding operation rather than appending a compensating event. This supports the application's current needs without requiring the additional complexity of a fully immutable, event-sourced model.
